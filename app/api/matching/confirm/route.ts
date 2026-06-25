@@ -21,7 +21,7 @@ export async function POST() {
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("status", "matching")
+    .in("status", ["matching", "confirmed"])
     .order("event_date", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(1)
@@ -32,6 +32,16 @@ export async function POST() {
       { ok: false, message: "확정할 조 편성이 없어요." },
       { status: 409 },
     );
+  }
+
+  const { data: currentEvent } = await supabase
+    .from("events")
+    .select("status")
+    .eq("id", event.id)
+    .single();
+
+  if (currentEvent?.status === "confirmed") {
+    return NextResponse.json({ ok: true });
   }
 
   await supabase
@@ -53,4 +63,3 @@ export async function POST() {
 
   return NextResponse.json({ ok: true });
 }
-

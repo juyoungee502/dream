@@ -20,6 +20,17 @@ export function CheckInForm({ mokjangs }: CheckInFormProps) {
     [mokjangId, mokjangs],
   );
 
+  if (mokjangs.length === 0) {
+    return (
+      <section className="soft-card checkin-card text-center">
+        <h2 className="text-xl font-black tracking-[-0.04em]">목장 목록이 없어요</h2>
+        <p className="mt-4 text-[15px] font-semibold leading-6 text-[var(--muted)]">
+          Supabase mokjangs 테이블에 활성 목장을 추가해주세요.
+        </p>
+      </section>
+    );
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
@@ -62,13 +73,11 @@ export function CheckInForm({ mokjangs }: CheckInFormProps) {
   }
 
   return (
-    <form className="soft-card p-5" onSubmit={onSubmit}>
-      <div className="mb-5">
-        <div className="mb-2 flex items-end justify-between gap-3">
-          <label className="text-[15px] font-black tracking-[-0.02em]" htmlFor="name">
-            이름
-          </label>
-          <span className="text-xs font-bold text-[var(--muted)]">실명으로 입력</span>
+    <form className="soft-card checkin-card" onSubmit={onSubmit}>
+      <div className="form-block">
+        <div className="field-title">
+          <label htmlFor="name">이름</label>
+          <span>실명으로 입력</span>
         </div>
         <input
           id="name"
@@ -80,10 +89,10 @@ export function CheckInForm({ mokjangs }: CheckInFormProps) {
         />
       </div>
 
-      <div>
-        <div className="mb-3 flex items-end justify-between gap-3">
-          <span className="text-[15px] font-black tracking-[-0.02em]">목장 선택</span>
-          <span className="text-xs font-bold text-[var(--muted)]">현재 소속 기준</span>
+      <div className="form-block">
+        <div className="field-title">
+          <span>목장 선택</span>
+          <span>현재 소속 기준</span>
         </div>
         <div className="grid-mokjang">
           {mokjangs.map((mokjang) => (
@@ -98,30 +107,22 @@ export function CheckInForm({ mokjangs }: CheckInFormProps) {
             </button>
           ))}
         </div>
-        <div className="mt-4 flex items-center justify-between rounded-[18px] border border-[#D8E9DF] bg-[var(--green-pale)] px-4 py-3 text-sm font-black text-[var(--green-dark)]">
+        <div className="selection-bar">
           <span>선택된 목장</span>
           <span>{selectedName}</span>
         </div>
       </div>
 
-      {message ? (
-        <p className="mt-4 rounded-[18px] bg-[#FEF3C7] px-4 py-3 text-sm font-bold text-[#92400E]">
-          {message}
-        </p>
-      ) : null}
+      {message ? <p className="form-message">{message}</p> : null}
 
-      <div className="mt-5 grid gap-3">
-        <button className="btn btn-primary w-full" disabled={pending} type="submit">
+      <div className="cta-stack">
+        <button className="btn btn-primary" disabled={pending} type="submit">
           {pending ? "출석 처리 중..." : "출석했어요!"}
         </button>
-        <Link
-          className="text-center text-sm font-bold text-[var(--muted)]"
-          href="/admin/login"
-        >
+        <Link className="admin-text-link" href="/admin/login">
           관리자 페이지
         </Link>
       </div>
     </form>
   );
 }
-

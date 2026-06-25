@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClientSupabase } from "@/src/lib/supabase/client";
 
 type AdminDashboardProps = {
   status: string;
@@ -20,6 +19,8 @@ export function AdminDashboard({
 }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetText, setResetText] = useState("");
   const [message, setMessage] = useState("");
 
   async function startMatching() {
@@ -45,10 +46,38 @@ export function AdminDashboard({
   }
 
   async function logout() {
-    const supabase = createClientSupabase();
-    await supabase.auth.signOut();
+    await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
     router.refresh();
+  }
+
+  async function resetAttendance() {
+    if (resetText.trim() !== "초기화") {
+      setMessage("출석명단을 초기화하려면 입력칸에 초기화를 입력해주세요.");
+      return;
+    }
+
+    setPending(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/reset-attendance", { method: "POST" });
+      const result = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !result.ok) {
+        setMessage(result.message ?? "출석명단을 초기화하지 못했어요.");
+        return;
+      }
+
+      setResetOpen(false);
+      setResetText("");
+      setMessage(result.message ?? "출석명단을 초기화했어요.");
+      router.refresh();
+    } catch {
+      setMessage("출석명단을 초기화하지 못했어요.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -109,6 +138,63 @@ export function AdminDashboard({
       </div>
 
       <div className="soft-card p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-black tracking-[-0.04em]">출석명단 초기화</h2>
+            <p className="mt-2 text-sm font-bold leading-6 text-[var(--muted)]">
+              오늘 출석 기록과 조 편성 결과를 지우고 다시 출석을 받을 수 있어요.
+            </p>
+          </div>
+          <span className="pill min-h-0 shrink-0 py-1 text-xs">{total}명</span>
+        </div>
+
+        {resetOpen ? (
+          <div className="mt-4 grid gap-3">
+            <input
+              className="field"
+              inputMode="text"
+              onChange={(event) => setResetText(event.target.value)}
+              placeholder="초기화 입력"
+              value={resetText}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="btn btn-ghost w-full"
+                disabled={pending}
+                onClick={() => {
+                  setResetOpen(false);
+                  setResetText("");
+                }}
+                type="button"
+              >
+                취소
+              </button>
+              <button
+                className="btn btn-danger w-full"
+                disabled={pending || resetText.trim() !== "초기화"}
+                onClick={resetAttendance}
+                type="button"
+              >
+                {pending ? "초기화 중..." : "초기화"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="btn btn-danger mt-4 w-full"
+            disabled={pending || total === 0}
+            onClick={() => {
+              setMessage("");
+              setResetOpen(true);
+            }}
+            type="button"
+          >
+            출석명단 초기화
+          </button>
+        )}
+      </div>
+
+      <div className="soft-card p-5">
         <h2 className="text-xl font-black tracking-[-0.04em]">목장별 현황</h2>
         <div className="mt-4 grid gap-2">
           {mokjangCounts.length > 0 ? (
@@ -152,4 +238,3 @@ export function AdminDashboard({
     </section>
   );
 }
-

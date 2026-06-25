@@ -32,6 +32,7 @@ export function MatchingManager({ status, groups }: MatchingManagerProps) {
   const allMembers = groups.flatMap((group) =>
     group.members.map((member) => ({ ...member, groupId: group.id })),
   );
+  const isConfirmed = status === "confirmed";
 
   async function runAction(path: string, label: string, done?: () => void) {
     setMessage("");
@@ -125,24 +126,40 @@ export function MatchingManager({ status, groups }: MatchingManagerProps) {
           </div>
           <span className="pill">{status}</span>
         </div>
-        <div className="mt-5 grid gap-3">
-          <button
-            className="btn btn-secondary w-full"
-            disabled={pendingAction !== "" || status === "confirmed"}
-            onClick={() => runAction("/api/matching/start", "start")}
-            type="button"
-          >
-            {pendingAction === "start" ? "편성 중..." : groups.length ? "다시 편성" : "자동 편성"}
-          </button>
-          <button
-            className="btn btn-primary w-full"
-            disabled={pendingAction !== "" || groups.length === 0 || status === "confirmed"}
-            onClick={() => runAction("/api/matching/confirm", "confirm")}
-            type="button"
-          >
-            {pendingAction === "confirm" ? "확정 중..." : "최종 결과 확정"}
-          </button>
-        </div>
+        {isConfirmed ? (
+          <div className="mt-5 grid gap-3">
+            <div className="rounded-[22px] bg-[var(--green-soft)] px-4 py-4 text-[15px] font-black leading-6 text-[var(--green-dark)]">
+              최종 결과가 확정되어 참석자에게 공개 중입니다.
+            </div>
+            <button
+              className="btn btn-primary w-full"
+              disabled={pendingAction !== ""}
+              onClick={() => runAction("/api/matching/confirm", "confirm")}
+              type="button"
+            >
+              {pendingAction === "confirm" ? "확인 중..." : "최종 결과 확정 완료"}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-3">
+            <button
+              className="btn btn-secondary w-full"
+              disabled={pendingAction !== ""}
+              onClick={() => runAction("/api/matching/start", "start")}
+              type="button"
+            >
+              {pendingAction === "start" ? "편성 중..." : groups.length ? "다시 편성" : "자동 편성"}
+            </button>
+            <button
+              className="btn btn-primary w-full"
+              disabled={pendingAction !== "" || groups.length === 0}
+              onClick={() => runAction("/api/matching/confirm", "confirm")}
+              type="button"
+            >
+              {pendingAction === "confirm" ? "확정 중..." : "최종 결과 확정"}
+            </button>
+          </div>
+        )}
         {message ? (
           <p className="mt-4 rounded-[18px] bg-[#FEF3C7] px-4 py-3 text-sm font-bold text-[#92400E]">
             {message}
@@ -150,7 +167,7 @@ export function MatchingManager({ status, groups }: MatchingManagerProps) {
         ) : null}
       </div>
 
-      {groups.length > 0 ? (
+      {groups.length > 0 && !isConfirmed ? (
         <form className="soft-card p-5" onSubmit={moveMember}>
           <h2 className="text-xl font-black tracking-[-0.04em]">수동 조정</h2>
           <div className="mt-4 grid gap-3">
@@ -222,4 +239,3 @@ export function MatchingManager({ status, groups }: MatchingManagerProps) {
     </section>
   );
 }
-

@@ -14,23 +14,19 @@ export function AppShell({ children, status, backHref, admin }: AppShellProps) {
     <main className="app-bg">
       <div className="phone-shell">
         <div className="content-pad">
-          <header className="mb-5 flex items-center justify-between gap-3">
-            <Link href={admin ? "/admin" : "/check-in"} className="flex items-center gap-3">
+          <header className="app-header">
+            <Link href={admin ? "/admin" : "/check-in"} className="brand">
               <Image
                 src="/logo.png"
                 alt="Dreamers logo"
                 width={54}
                 height={54}
-                className="h-[54px] w-[54px] rounded-full bg-white object-cover shadow-sm"
+                className="brand-logo"
                 priority
               />
-              <span className="leading-tight">
-                <span className="block text-[16px] font-black tracking-[-0.04em]">
-                  WE ARE DREAMERS
-                </span>
-                <span className="block text-xs font-bold text-[var(--muted)]">
-                  산모임 출석
-                </span>
+              <span>
+                <span className="brand-title">WE ARE DREAMERS</span>
+                <span className="brand-subtitle">산모임 출석</span>
               </span>
             </Link>
             {backHref ? (

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/src/components/AppShell";
 import { AdminDashboard } from "@/src/components/AdminDashboard";
-import { createServerSupabase } from "@/src/lib/supabase/server";
+import { hasAdminSession } from "@/src/lib/admin-pin";
+import { createAdminSupabase } from "@/src/lib/supabase/admin";
 
 type AttendanceWithPerson = {
   id: string;
@@ -17,17 +18,13 @@ type AttendanceWithPerson = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const supabase = await createServerSupabase();
-
-  if (!supabase) {
+  if (!(await hasAdminSession())) {
     redirect("/admin/login");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = createAdminSupabase();
 
-  if (!user) {
+  if (!supabase) {
     redirect("/admin/login");
   }
 
@@ -84,4 +81,3 @@ export default async function AdminPage() {
     </AppShell>
   );
 }
-

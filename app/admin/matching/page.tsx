@@ -4,7 +4,8 @@ import {
   MatchingManager,
   type MatchingGroup,
 } from "@/src/components/MatchingManager";
-import { createServerSupabase } from "@/src/lib/supabase/server";
+import { hasAdminSession } from "@/src/lib/admin-pin";
+import { createAdminSupabase } from "@/src/lib/supabase/admin";
 
 type MemberRow = {
   small_group_id: string;
@@ -20,17 +21,13 @@ type MemberRow = {
 export const dynamic = "force-dynamic";
 
 export default async function MatchingPage() {
-  const supabase = await createServerSupabase();
-
-  if (!supabase) {
+  if (!(await hasAdminSession())) {
     redirect("/admin/login");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = createAdminSupabase();
 
-  if (!user) {
+  if (!supabase) {
     redirect("/admin/login");
   }
 
@@ -84,4 +81,3 @@ export default async function MatchingPage() {
     </AppShell>
   );
 }
-

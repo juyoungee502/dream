@@ -2,34 +2,34 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { createClientSupabase } from "@/src/lib/supabase/client";
-import { hasSupabaseBrowserEnv } from "@/src/lib/supabase/env";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
-  const configured = hasSupabaseBrowserEnv();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
 
-    if (!configured) {
-      setMessage("Supabase 환경변수 설정이 필요해요.");
+    if (!/^\d{4}$/.test(pin)) {
+      setMessage("관리자 비밀번호 4자리를 입력해주세요.");
       return;
     }
 
     setPending(true);
 
     try {
-      const supabase = createClientSupabase();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ pin }),
+      });
+      const result = (await response.json()) as { ok: boolean; message?: string };
 
-      if (error) {
-        setMessage("이메일 또는 비밀번호를 다시 확인해주세요.");
+      if (!response.ok || !result.ok) {
+        setMessage(result.message ?? "관리자 비밀번호를 다시 확인해주세요.");
         return;
       }
 
@@ -44,37 +44,27 @@ export function AdminLoginForm() {
 
   return (
     <form className="soft-card mt-8 p-5" onSubmit={onSubmit}>
-      <div className="grid gap-4">
-        <label className="grid gap-2 text-sm font-black">
-          이메일
-          <input
-            className="field"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="email"
-            placeholder="admin@example.com"
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-black">
-          비밀번호
-          <input
-            className="field"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            placeholder="비밀번호"
-          />
-        </label>
-      </div>
+      <label className="grid gap-2 text-sm font-black">
+        관리자 비밀번호
+        <input
+          className="field"
+          type="password"
+          inputMode="numeric"
+          pattern="[0-9]{4}"
+          maxLength={4}
+          value={pin}
+          onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+          autoComplete="current-password"
+          placeholder="숫자 4자리"
+        />
+      </label>
       {message ? (
         <p className="mt-4 rounded-[18px] bg-[#FEF3C7] px-4 py-3 text-sm font-bold text-[#92400E]">
           {message}
         </p>
       ) : null}
       <button className="btn btn-primary mt-5 w-full" disabled={pending} type="submit">
-        {pending ? "로그인 중..." : "로그인"}
+        {pending ? "확인 중..." : "관리자 로그인"}
       </button>
     </form>
   );

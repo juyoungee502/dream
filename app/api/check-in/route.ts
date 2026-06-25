@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+  const adminSupabase = supabase;
 
   let body: CheckInBody;
 
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   const name = body.name?.trim() ?? "";
-  const mokjangId = body.mokjangId ?? "";
+  const mokjangInput = body.mokjangId?.trim() ?? "";
 
   if (!name) {
     return NextResponse.json(
@@ -39,50 +40,58 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!mokjangId) {
+  if (!mokjangInput) {
     return NextResponse.json(
       { ok: false, message: "목장을 선택해주세요." },
       { status: 400 },
     );
   }
 
-  const { data: event, error: eventError } = await supabase
-    .from("events")
-    .select("id")
-    .eq("status", "open")
-    .order("event_date", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const mokjangResult = await resolveMokjangId(mokjangInput);
 
-  if (eventError) {
-    return NextResponse.json({ ok: false, message: FRIENDLY_ERROR }, { status: 500 });
+  if (!mokjangResult.ok) {
+    return NextResponse.json(
+      { ok: false, message: mokjangResult.message },
+      { status: mokjangResult.status },
+    );
   }
 
-  if (!event) {
+  const eventResult = await getOrCreateOpenEvent();
+
+  if (!eventResult.ok) {
     return NextResponse.json(
-      { ok: false, message: "지금은 출석 가능한 산모임이 없어요." },
-      { status: 409 },
+      { ok: false, message: eventResult.message },
+      { status: eventResult.status },
     );
   }
 
   const normalizedName = normalizeName(name);
-  const { data: person, error: personError } = await supabase
+  const { data: person, error: personError } = await adminSupabase
     .from("people")
     .upsert(
-      { name, normalized_name: normalizedName, mokjang_id: mokjangId },
+      {
+        name,
+        normalized_name: normalizedName,
+        mokjang_id: mokjangResult.mokjangId,
+      },
       { onConflict: "normalized_name,mokjang_id" },
     )
     .select("id")
     .single();
 
   if (personError || !person) {
-    return NextResponse.json({ ok: false, message: FRIENDLY_ERROR }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        message: getDatabaseMessage(personError?.code, personError?.message) ?? FRIENDLY_ERROR,
+      },
+      { status: 500 },
+    );
   }
 
-  const { data: attendance, error: attendanceError } = await supabase
+  const { data: attendance, error: attendanceError } = await adminSupabase
     .from("attendances")
-    .insert({ event_id: event.id, person_id: person.id })
+    .insert({ event_id: eventResult.eventId, person_id: person.id })
     .select("id")
     .single();
 
@@ -91,10 +100,10 @@ export async function POST(request: Request) {
   }
 
   if (attendanceError?.code === "23505") {
-    const { data: existing, error: existingError } = await supabase
+    const { data: existing, error: existingError } = await adminSupabase
       .from("attendances")
       .select("id")
-      .eq("event_id", event.id)
+      .eq("event_id", eventResult.eventId)
       .eq("person_id", person.id)
       .single();
 
@@ -103,6 +112,110 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: false, message: FRIENDLY_ERROR }, { status: 500 });
+  return NextResponse.json(
+    {
+      ok: false,
+      message:
+        getDatabaseMessage(attendanceError?.code, attendanceError?.message) ??
+        FRIENDLY_ERROR,
+    },
+    { status: 500 },
+  );
+
+  async function resolveMokjangId(input: string) {
+    if (isUuid(input)) {
+      const { data, error } = await adminSupabase
+        .from("mokjangs")
+        .select("id")
+        .eq("id", input)
+        .maybeSingle();
+
+      if (error) {
+        return {
+          ok: false as const,
+          status: 500,
+          message:
+            getDatabaseMessage(error.code, error.message) ??
+            "목장 정보를 확인하지 못했어요.",
+        };
+      }
+
+      if (data?.id) {
+        return { ok: true as const, mokjangId: data.id };
+      }
+    }
+
+    return {
+      ok: false as const,
+      status: 400,
+      message: "Supabase에서 불러온 목장을 선택해주세요.",
+    };
+  }
+
+  async function getOrCreateOpenEvent() {
+    const { data: event, error: eventError } = await adminSupabase
+    .from("events")
+    .select("id")
+    .eq("status", "open")
+    .order("event_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+    if (eventError) {
+      return {
+        ok: false as const,
+        status: 500,
+        message: getDatabaseMessage(eventError.code, eventError.message) ?? FRIENDLY_ERROR,
+      };
+    }
+
+    if (event?.id) {
+      return { ok: true as const, eventId: event.id };
+    }
+
+    const { data: createdEvent, error: createEventError } = await adminSupabase
+      .from("events")
+      .insert({ title: "오늘의 산모임", event_date: todayDate(), status: "open" })
+      .select("id")
+      .single();
+
+    if (createEventError || !createdEvent) {
+      return {
+        ok: false as const,
+        status: 500,
+        message:
+          getDatabaseMessage(createEventError?.code, createEventError?.message) ??
+          FRIENDLY_ERROR,
+      };
+    }
+
+    return { ok: true as const, eventId: createdEvent.id };
+  }
 }
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function todayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDatabaseMessage(code?: string, message?: string) {
+  if (message?.toLowerCase().includes("invalid api key")) {
+    return "Supabase API 키가 올바르지 않아요. .env.local의 URL과 service_role 키를 다시 확인해주세요.";
+  }
+
+  if (code === "42P01") {
+    return "Supabase SQL Editor에서 src/db/schema.sql을 먼저 실행해주세요.";
+  }
+
+  if (code === "23503") {
+    return "목장 또는 산모임 데이터가 아직 준비되지 않았어요. 다시 시도해주세요.";
+  }
+
+  return null;
+}

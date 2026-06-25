@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/src/components/AppShell";
 import { RulesManager, type RulePerson } from "@/src/components/RulesManager";
-import { createServerSupabase } from "@/src/lib/supabase/server";
+import { hasAdminSession } from "@/src/lib/admin-pin";
+import { createAdminSupabase } from "@/src/lib/supabase/admin";
 
 type PersonRow = {
   id: string;
@@ -12,17 +13,13 @@ type PersonRow = {
 export const dynamic = "force-dynamic";
 
 export default async function RulesPage() {
-  const supabase = await createServerSupabase();
-
-  if (!supabase) {
+  if (!(await hasAdminSession())) {
     redirect("/admin/login");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = createAdminSupabase();
 
-  if (!user) {
+  if (!supabase) {
     redirect("/admin/login");
   }
 
@@ -53,4 +50,3 @@ export default async function RulesPage() {
     </AppShell>
   );
 }
-
