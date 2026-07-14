@@ -153,25 +153,33 @@ export async function POST(request: Request) {
   }
 
   async function getOrCreateOpenEvent() {
-    const { data: event, error: eventError } = await adminSupabase
+    const { data: todayEvent, error: todayEventError } = await adminSupabase
     .from("events")
-    .select("id")
-    .eq("status", "open")
-    .order("event_date", { ascending: false })
+    .select("id,status")
+    .eq("event_date", todayDate())
+    .in("status", ["ready", "open", "matching", "confirmed"])
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-    if (eventError) {
+    if (todayEventError) {
       return {
         ok: false as const,
         status: 500,
-        message: getDatabaseMessage(eventError.code, eventError.message) ?? FRIENDLY_ERROR,
+        message: getDatabaseMessage(todayEventError.code, todayEventError.message) ?? FRIENDLY_ERROR,
       };
     }
 
-    if (event?.id) {
-      return { ok: true as const, eventId: event.id };
+    if (todayEvent?.status === "open") {
+      return { ok: true as const, eventId: todayEvent.id };
+    }
+
+    if (todayEvent?.id) {
+      return {
+        ok: false as const,
+        status: 409,
+        message: "오늘 출석 접수가 마감되었어요. 늦게 오셨다면 관리자에게 말씀해주세요.",
+      };
     }
 
     const { data: createdEvent, error: createEventError } = await adminSupabase

@@ -38,7 +38,7 @@ export default async function AdminPage() {
     .maybeSingle();
 
   const eventId = event?.id ?? "";
-  const [{ count }, recentResult] = await Promise.all([
+  const [{ count }, attendanceResult] = await Promise.all([
     eventId
       ? supabase
           .from("attendances")
@@ -51,19 +51,19 @@ export default async function AdminPage() {
           .select("id,checked_in_at,people(name,mokjangs(name))")
           .eq("event_id", eventId)
           .order("checked_in_at", { ascending: false })
-          .limit(30)
       : Promise.resolve({ data: [] }),
   ]);
 
-  const recent = ((recentResult.data ?? []) as AttendanceWithPerson[]).map((row) => ({
+  const attendanceRows = ((attendanceResult.data ?? []) as AttendanceWithPerson[]).map((row) => ({
     id: row.id,
     name: row.people?.name ?? "참석자",
     mokjangName: row.people?.mokjangs?.name ?? "목장",
     checkedInAt: row.checked_in_at,
   }));
+  const recent = attendanceRows.slice(0, 12);
 
   const counts = new Map<string, number>();
-  recent.forEach((row) => {
+  attendanceRows.forEach((row) => {
     counts.set(row.mokjangName, (counts.get(row.mokjangName) ?? 0) + 1);
   });
 

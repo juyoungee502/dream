@@ -8,7 +8,9 @@ export const MOKJANGS = [
   "석민 목장",
   "승민 목장",
   "은수 목장",
+  "태경 목장",
   "새가족",
+  "청년부",
 ] as const;
 
 export type MokjangOption = {
@@ -23,4 +25,3 @@ export const FALLBACK_MOKJANGS: MokjangOption[] = MOKJANGS.map((name) => ({
 
 export const FRIENDLY_ERROR =
   "처리 중 문제가 생겼어요. 잠시 뒤 다시 한 번 시도해주세요.";
-

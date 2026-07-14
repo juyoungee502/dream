@@ -18,8 +18,9 @@ insert into mokjangs (name, sort_order) values
 ('석민 목장', 7),
 ('승민 목장', 8),
 ('은수 목장', 9),
-('새가족', 10),
-('청년부', 11),
+('태경 목장', 10),
+('새가족', 11),
+('청년부', 12)
 on conflict (name) do update set sort_order = excluded.sort_order;
 
 create table if not exists events (
@@ -99,4 +100,3 @@ where not exists (
   where event_date = current_date
     and status in ('ready', 'open', 'matching', 'confirmed')
 );
-
