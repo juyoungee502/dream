@@ -58,18 +58,19 @@
 
 .avatarGrid {
   display: flex;
-  min-height: 126px;
+  min-height: 140px;
   align-items: flex-end;
   justify-content: center;
   gap: clamp(1px, 0.9vw, 5px);
   margin-top: 18px;
+  margin-inline: -8px;
 }
 
 .avatarButton {
   position: relative;
   display: grid;
   width: 25%;
-  height: 126px;
+  height: 138px;
   min-width: 0;
   flex: 1 1 0;
   place-items: end center;
@@ -101,10 +102,12 @@
 .avatarImage {
   width: auto;
   max-width: 100%;
-  height: 116px;
+  height: 124px;
   max-height: 100%;
   object-fit: contain;
   object-position: center bottom;
+  transform: scale(1.1);
+  transform-origin: center bottom;
 }
 
 .check {
@@ -181,7 +184,7 @@
 @media (max-width: 460px) {
   .card {
     margin-top: 28px;
-    padding: 32px 16px 25px;
+    padding: 32px 10px 25px;
   }
 
   .title {
@@ -193,30 +196,30 @@
   }
 
   .avatarButton {
-    height: 118px;
+    height: 132px;
     border-radius: 16px;
   }
 
   .avatarImage {
-    height: 108px;
+    height: 120px;
   }
 }
 
 @media (max-width: 375px) {
   .card {
-    padding-inline: 14px;
+    padding-inline: 10px;
   }
 
   .avatarGrid {
-    min-height: 112px;
+    min-height: 130px;
   }
 
   .avatarButton {
-    height: 112px;
+    height: 128px;
   }
 
   .avatarImage {
-    height: 102px;
+    height: 116px;
   }
 }
 
