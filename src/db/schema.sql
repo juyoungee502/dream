@@ -9,19 +9,40 @@ create table if not exists mokjangs (
 );
 
 insert into mokjangs (name, sort_order) values
-('찬호 목장', 1),
-('예은 목장', 2),
-('은택 목장', 3),
-('예서 목장', 4),
-('예원 목장', 5),
-('민경 목장', 6),
-('석민 목장', 7),
-('승민 목장', 8),
-('은수 목장', 9),
-('태경 목장', 10),
-('새가족', 11),
-('청년부', 12)
-on conflict (name) do update set sort_order = excluded.sort_order;
+('박신실 목장', 1),
+('서은수 목장', 2),
+('김은택 목장', 3),
+('노예은 목장', 4),
+('전석민 목장', 5),
+('김태양 목장', 6),
+('김주람 목장', 7),
+('김희현 목장', 8),
+('김찬호 목장', 9),
+('조은서 목장', 10),
+('이예서 목장', 11),
+('장민경 목장', 12),
+('새가족 목장', 13)
+on conflict (name) do update set
+  sort_order = excluded.sort_order,
+  is_active = true;
+
+update mokjangs
+set is_active = false
+where name not in (
+  '박신실 목장',
+  '서은수 목장',
+  '김은택 목장',
+  '노예은 목장',
+  '전석민 목장',
+  '김태양 목장',
+  '김주람 목장',
+  '김희현 목장',
+  '김찬호 목장',
+  '조은서 목장',
+  '이예서 목장',
+  '장민경 목장',
+  '새가족 목장'
+);
 
 create table if not exists events (
   id uuid primary key default gen_random_uuid(),
