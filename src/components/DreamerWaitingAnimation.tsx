@@ -63,7 +63,6 @@ export function DreamerWaitingAnimation({
       <div className={styles.pickerCopy}>
         <span className={styles.eyebrow}>기다리는 동안,</span>
         <p className={styles.description}>오늘의 드리머를 골라보세요!</p>
-        <p className={styles.hint}>선택하지 않아도 자동으로 정해져요.</p>
       </div>
 
       <div className={styles.avatarGrid} aria-label="드리머 캐릭터 선택">
@@ -94,6 +93,21 @@ export function DreamerWaitingAnimation({
             </button>
           );
         })}
+      </div>
+
+      <div
+        className={styles.pageIndicator}
+        aria-label={`${setIndex + 1}번째 드리머 세트`}
+      >
+        {dreamerSets.map((_, index) => (
+          <span
+            className={`${styles.pageDot}${
+              index === setIndex ? ` ${styles.activePageDot}` : ""
+            }`}
+            key={index}
+            aria-hidden="true"
+          />
+        ))}
       </div>
 
       <button

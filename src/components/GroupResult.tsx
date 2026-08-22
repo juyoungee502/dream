@@ -129,7 +129,10 @@ export function GroupResult({ attendanceId }: { attendanceId: string }) {
   return (
     <section className={styles.result}>
       <div className={`soft-card ${styles.heroCard}`}>
-        <span className="pill">조 편성 확정</span>
+        <span className={styles.confirmationIcon} aria-hidden="true">
+          ✓
+        </span>
+        <p className={styles.confirmationLabel}>조 편성 확정</p>
         <h1>
           {data.myName}님은
           <strong>{data.groupNumber}조예요!</strong>

@@ -1,0 +1,53 @@
+.shell :global(.content-pad) {
+  padding-top: 14px;
+}
+
+.shell :global(.app-header) {
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.shell :global(.brand) {
+  gap: 10px;
+}
+
+.shell :global(.brand-logo) {
+  width: 50px;
+  height: 50px;
+}
+
+.shell :global(.brand-title) {
+  font-size: 15px;
+}
+
+.shell :global(.brand-subtitle) {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.shell :global(.pill) {
+  min-height: 32px;
+  gap: 7px;
+  padding: 6px 11px;
+  font-size: 12px;
+}
+
+@media (max-width: 375px) {
+  .shell :global(.content-pad) {
+    padding-inline: 16px;
+  }
+
+  .shell :global(.brand-logo) {
+    width: 46px;
+    height: 46px;
+  }
+
+  .shell :global(.brand-title) {
+    font-size: 14px;
+  }
+
+  .shell :global(.pill) {
+    padding-inline: 9px;
+    font-size: 11px;
+  }
+}

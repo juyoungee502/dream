@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/src/components/AppShell";
 import { GroupResult } from "@/src/components/GroupResult";
+import shellStyles from "@/src/components/MatchingFlowShell.module.css";
 
 type MyGroupPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -15,9 +16,8 @@ export default async function MyGroupPage({ searchParams }: MyGroupPageProps) {
   }
 
   return (
-    <AppShell status="내 조 확인">
+    <AppShell status="조 편성 완료" shellClassName={shellStyles.shell}>
       <GroupResult attendanceId={attendanceId} />
     </AppShell>
   );
 }
-

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/src/components/AppShell";
 import { WaitingScreen } from "@/src/components/WaitingScreen";
+import shellStyles from "@/src/components/MatchingFlowShell.module.css";
 
 type WaitingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -15,9 +16,8 @@ export default async function WaitingPage({ searchParams }: WaitingPageProps) {
   }
 
   return (
-    <AppShell status="결과 대기">
+    <AppShell status="결과 대기" shellClassName={shellStyles.shell}>
       <WaitingScreen attendanceId={attendanceId} />
     </AppShell>
   );
 }
-
