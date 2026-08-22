@@ -9,10 +9,37 @@ type CheckInFormProps = {
   mokjangs: MokjangOption[];
 };
 
+const MOKJANG_DISPLAY_ORDER = [
+  "희현 목장",
+  "민경 목장",
+  "예서 목장",
+  "은수 목장",
+  "신실 목장",
+  "태양 목장",
+  "주람 목장",
+  "은서 목장",
+  "찬호 목장",
+  "은택 목장",
+  "예은 목장",
+  "석민 목장",
+  "새가족 목장",
+] as const;
+
 export function CheckInForm({ mokjangs }: CheckInFormProps) {
   const router = useRouter();
+  const orderedMokjangs = useMemo(() => {
+    const order = new Map<string, number>(
+      MOKJANG_DISPLAY_ORDER.map((mokjangName, index) => [mokjangName, index]),
+    );
+
+    return [...mokjangs].sort(
+      (first, second) =>
+        (order.get(first.name) ?? Number.MAX_SAFE_INTEGER) -
+        (order.get(second.name) ?? Number.MAX_SAFE_INTEGER),
+    );
+  }, [mokjangs]);
   const [name, setName] = useState("");
-  const [mokjangId, setMokjangId] = useState(mokjangs[0]?.id ?? "");
+  const [mokjangId, setMokjangId] = useState(orderedMokjangs[0]?.id ?? "");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const selectedName = useMemo(
@@ -91,11 +118,14 @@ export function CheckInForm({ mokjangs }: CheckInFormProps) {
 
       <div className="form-block">
         <div className="field-title">
-          <span>목장 선택</span>
+          <div className="field-title-with-note">
+            <span>목장 선택</span>
+            <small>(아마도 목자 나이 순)</small>
+          </div>
           <span>현재 소속 기준</span>
         </div>
         <div className="grid-mokjang">
-          {mokjangs.map((mokjang) => (
+          {orderedMokjangs.map((mokjang) => (
             <button
               className="mokjang-button"
               data-selected={mokjang.id === mokjangId}

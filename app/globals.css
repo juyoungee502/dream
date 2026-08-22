@@ -372,6 +372,23 @@ button {
   line-height: 1.2;
 }
 
+.field-title-with-note {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.field-title-with-note small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 .selection-bar {
   display: flex;
   align-items: center;
