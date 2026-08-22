@@ -6,6 +6,17 @@ type PersonWithMokjang = {
   mokjangs: { name: string } | null;
 };
 
+type GroupMemberRow = {
+  person_id: string;
+  people: PersonWithMokjang | null;
+};
+
+type AttendanceAvatarRow = {
+  id: string;
+  person_id: string;
+  avatar_id: number | null;
+};
+
 export async function GET(request: Request) {
   const supabase = createAdminSupabase();
   const { searchParams } = new URL(request.url);
@@ -81,25 +92,77 @@ export async function GET(request: Request) {
   }
 
   const group = groups?.find((item) => item.id === membership.small_group_id);
-  const { data: members } = await supabase
+  const { data: memberData } = await supabase
     .from("small_group_members")
-    .select("people(name,mokjangs(name))")
+    .select("person_id,people(name,mokjangs(name))")
     .eq("small_group_id", membership.small_group_id);
-
+  const members = (memberData ?? []) as unknown as GroupMemberRow[];
+  const personIds = members.map((member) => member.person_id);
+  const attendanceByPersonId = await getAttendanceAvatars(
+    supabase,
+    attendance.event_id,
+    personIds,
+  );
   const myPerson = attendance.people as { name?: string } | null;
 
   return NextResponse.json({
     ok: true,
     myName: myPerson?.name ?? "참석자",
+    myAttendanceId: attendanceId,
     groupNumber: group?.group_number,
-    members:
-      members?.map((member) => {
-        const person = member.people as PersonWithMokjang | null;
-        return {
-          name: person?.name ?? "참석자",
-          mokjangName: person?.mokjangs?.name ?? "목장",
-        };
-      }) ?? [],
+    members: members.map((member) => {
+      const person = member.people;
+      const memberAttendance = attendanceByPersonId.get(member.person_id);
+
+      return {
+        attendanceId: memberAttendance?.id ?? member.person_id,
+        name: person?.name ?? "참석자",
+        mokjangName: person?.mokjangs?.name ?? "목장",
+        avatarId: memberAttendance?.avatar_id ?? null,
+      };
+    }),
   });
 }
 
+async function getAttendanceAvatars(
+  supabase: NonNullable<ReturnType<typeof createAdminSupabase>>,
+  eventId: string,
+  personIds: string[],
+) {
+  const rowsByPersonId = new Map<string, AttendanceAvatarRow>();
+
+  if (personIds.length === 0) {
+    return rowsByPersonId;
+  }
+
+  const withAvatar = await supabase
+    .from("attendances")
+    .select("id,person_id,avatar_id")
+    .eq("event_id", eventId)
+    .in("person_id", personIds);
+
+  if (!withAvatar.error) {
+    for (const row of withAvatar.data ?? []) {
+      rowsByPersonId.set(row.person_id, row);
+    }
+
+    return rowsByPersonId;
+  }
+
+  // Keep the group result usable until the optional avatar migration is applied.
+  if (withAvatar.error.code !== "42703") {
+    return rowsByPersonId;
+  }
+
+  const withoutAvatar = await supabase
+    .from("attendances")
+    .select("id,person_id")
+    .eq("event_id", eventId)
+    .in("person_id", personIds);
+
+  for (const row of withoutAvatar.data ?? []) {
+    rowsByPersonId.set(row.person_id, { ...row, avatar_id: null });
+  }
+
+  return rowsByPersonId;
+}

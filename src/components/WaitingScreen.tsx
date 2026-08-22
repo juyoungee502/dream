@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { DreamerWaitingAnimation } from "@/src/components/DreamerWaitingAnimation";
+import {
+  getDreamerAvatarStorageKeys,
+  isDreamerAvatarId,
+} from "@/src/lib/dreamer-avatar";
 
 type WaitingScreenProps = {
   attendanceId: string;
@@ -37,6 +41,7 @@ export function WaitingScreen({ attendanceId }: WaitingScreenProps) {
         if (!active) return;
 
         if (response.ok && result.ok && result.ready) {
+          saveExplicitAvatarInBackground(attendanceId);
           router.replace(`/my-group?attendanceId=${encodeURIComponent(attendanceId)}`);
           return;
         }
@@ -66,4 +71,30 @@ export function WaitingScreen({ attendanceId }: WaitingScreenProps) {
       statusMessage={message}
     />
   );
+}
+
+function saveExplicitAvatarInBackground(attendanceId: string) {
+  const storageKeys = getDreamerAvatarStorageKeys(attendanceId);
+
+  if (window.sessionStorage.getItem(storageKeys.explicit) !== "true") {
+    return;
+  }
+
+  const avatarId = Number.parseInt(
+    window.sessionStorage.getItem(storageKeys.avatarId) ?? "",
+    10,
+  );
+
+  if (!isDreamerAvatarId(avatarId)) {
+    return;
+  }
+
+  void fetch("/api/avatar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ attendanceId, avatarId }),
+    keepalive: true,
+  }).catch(() => {
+    // Avatar persistence is optional and must never interrupt matching.
+  });
 }
