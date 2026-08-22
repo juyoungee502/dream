@@ -1,0 +1,211 @@
+.page {
+  display: grid;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+.navigation {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.navigation::-webkit-scrollbar {
+  display: none;
+}
+
+.navItem {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.navItem.active {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green-dark);
+}
+
+.overview,
+.groupCard {
+  padding: 20px;
+}
+
+.overviewHeader,
+.groupHeader,
+.memberRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overviewHeader {
+  align-items: flex-start;
+}
+
+.kicker {
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.overview h1 {
+  margin-top: 5px;
+  color: var(--foreground);
+  font-size: 27px;
+  font-weight: 950;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.metrics {
+  display: flex;
+  gap: 18px;
+  margin: 17px 0;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: white;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.metrics strong {
+  color: var(--green-dark);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.message {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.groupList {
+  display: grid;
+  gap: 12px;
+}
+
+.groupHeader h2 {
+  color: var(--green-dark);
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.groupHeader span,
+.groupLabel {
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.memberList {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.memberRow {
+  min-height: 64px;
+  border-bottom: 1px solid var(--line);
+}
+
+.memberRow:last-child {
+  border-bottom: 0;
+}
+
+.memberIdentity {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.memberIdentity strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberIdentity small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupSelect {
+  flex: 0 0 auto;
+  min-width: 82px;
+  height: 40px;
+  padding: 0 28px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background-color: white;
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.groupSelect:focus-visible {
+  outline: 3px solid rgb(8 127 80 / 20%);
+  outline-offset: 2px;
+}
+
+.groupSelect:disabled {
+  opacity: 0.56;
+}
+
+.emptyGroup {
+  padding: 18px 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.publishBar {
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 380px) {
+  .overview,
+  .groupCard {
+    padding: 18px 16px;
+  }
+
+  .overview h1 {
+    font-size: 24px;
+  }
+
+  .navItem {
+    padding-inline: 13px;
+    font-size: 13px;
+  }
+
+  .groupSelect {
+    min-width: 76px;
+    padding-left: 10px;
+  }
+}

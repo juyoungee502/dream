@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ResetAttendanceControl } from "@/src/components/ResetAttendanceControl";
+import styles from "./AdminDashboard.module.css";
 
 type AdminDashboardProps = {
   status: string;
@@ -26,68 +28,42 @@ export function AdminDashboard({
   recent,
 }: AdminDashboardProps) {
   const router = useRouter();
-  const [pending, setPending] = useState("");
-  const [resetOpen, setResetOpen] = useState(false);
-  const [resetText, setResetText] = useState("");
+  const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const statusLabel = STATUS_LABEL[status] ?? status;
-  const canCreateGroups = total > 0 && status !== "confirmed";
   const summary = useMemo(() => {
     if (status === "confirmed") {
-      return "참석자들이 조 결과를 확인할 수 있어요.";
+      return "확정된 조가 참석자에게 공개되고 있어요.";
     }
+
+    if (status === "matching") {
+      return "현재 편성된 조를 검토하고 필요한 조원만 옮겨주세요.";
+    }
+
     if (total === 0) {
       return "QR을 공유하고 출석을 기다리면 돼요.";
     }
-    return "출석이 끝났다면 바로 공개하거나 검토 후 공개하세요.";
+
+    return "출석이 끝나면 조 편성을 시작해주세요.";
   }, [status, total]);
 
-  async function postJson(path: string) {
-    const response = await fetch(path, { method: "POST" });
-    const result = (await response.json()) as {
-      ok: boolean;
-      message?: string;
-      warnings?: string[];
-    };
-
-    if (!response.ok || !result.ok) {
-      throw new Error(result.message ?? "요청을 처리하지 못했어요.");
-    }
-
-    return result;
-  }
-
-  async function quickPublish() {
-    setPending("quick");
+  async function startMatching() {
+    setPending(true);
     setMessage("");
 
     try {
-      await postJson("/api/matching/start");
-      await postJson("/api/matching/confirm");
-      setMessage(`${total}명 조 편성을 공개했어요.`);
-      router.refresh();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "빠른 공개에 실패했어요.");
-    } finally {
-      setPending("");
-    }
-  }
+      const response = await fetch("/api/matching/start", { method: "POST" });
+      const result = (await response.json()) as { ok: boolean; message?: string };
 
-  async function reviewMatching() {
-    setPending("review");
-    setMessage("");
-
-    try {
-      const result = await postJson("/api/matching/start");
-      if (result.warnings?.length) {
-        setMessage(result.warnings.join(" "));
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message ?? "조 편성을 시작하지 못했어요.");
       }
+
       router.push("/admin/matching");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "조 편성을 시작하지 못했어요.");
-    } finally {
-      setPending("");
+      setPending(false);
     }
   }
 
@@ -97,212 +73,115 @@ export function AdminDashboard({
     router.refresh();
   }
 
-  async function resetAttendance() {
-    if (resetText.trim() !== "초기화") {
-      setMessage("출석명단을 초기화하려면 입력칸에 초기화를 입력해주세요.");
-      return;
-    }
-
-    setPending("reset");
-    setMessage("");
-
-    try {
-      const result = await postJson("/api/admin/reset-attendance");
-      setResetOpen(false);
-      setResetText("");
-      setMessage(result.message ?? "출석명단을 초기화했어요.");
-      router.refresh();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "출석명단을 초기화하지 못했어요.");
-    } finally {
-      setPending("");
-    }
-  }
-
   return (
-    <section className="grid gap-4">
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        <Link className="btn btn-secondary min-h-10 rounded-full px-4 text-sm" href="/admin">
+    <section className={styles.page}>
+      <nav className={styles.navigation} aria-label="관리자 메뉴">
+        <Link className={`${styles.navItem} ${styles.active}`} href="/admin">
           운영
         </Link>
-        <Link className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" href="/admin/matching">
-          조 확인
+        <Link className={styles.navItem} href="/admin/matching">
+          조 편성
         </Link>
-        <Link className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" href="/admin/rules">
+        <Link className={styles.navItem} href="/admin/rules">
           배정 금지
         </Link>
-        <button className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" onClick={logout}>
+        <button className={styles.navItem} onClick={logout} type="button">
           로그아웃
         </button>
-      </div>
+      </nav>
 
-      <div className="soft-card p-5">
-        <div className="flex items-start justify-between gap-3">
+      <section className={`soft-card ${styles.statusCard}`}>
+        <div className={styles.statusHeader}>
           <div>
-            <p className="text-sm font-black text-[var(--green-dark)]">오늘의 산모임</p>
-            <h1 className="mt-1 text-[30px] font-black tracking-[-0.055em]">
-              {statusLabel}
-            </h1>
-            <p className="mt-2 text-sm font-bold leading-6 text-[var(--muted)]">{summary}</p>
+            <p className={styles.kicker}>오늘의 산모임</p>
+            <h1 className={styles.title}>{statusLabel}</h1>
           </div>
-          <span className="pill shrink-0">{statusLabel}</span>
+          <span className="pill">{statusLabel}</span>
         </div>
+        <p className={styles.summary}>{summary}</p>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-[22px] border border-[var(--line)] bg-white p-4">
-            <div className="text-[36px] font-black text-[var(--green-dark)]">{total}</div>
-            <div className="text-sm font-bold text-[var(--muted)]">출석</div>
+        <div className={styles.metrics}>
+          <div className={styles.metric}>
+            <strong>{total}</strong>
+            <span>출석</span>
           </div>
-          <div className="rounded-[22px] border border-[var(--line)] bg-white p-4">
-            <div className="text-[36px] font-black text-[var(--green-dark)]">
-              {mokjangCounts.length}
-            </div>
-            <div className="text-sm font-bold text-[var(--muted)]">목장</div>
+          <div className={styles.metric}>
+            <strong>{mokjangCounts.length}</strong>
+            <span>목장</span>
           </div>
         </div>
 
         {status === "confirmed" ? (
-          <Link className="btn btn-primary mt-5 w-full" href="/admin/matching">
-            공개된 조 보기
+          <Link className="btn btn-primary w-full" href="/admin/matching">
+            공개된 조 확인
+          </Link>
+        ) : status === "matching" ? (
+          <Link className="btn btn-primary w-full" href="/admin/matching">
+            조 편성 이어서 확인
           </Link>
         ) : (
-          <div className="mt-5 grid gap-2">
-            <button
-              className="btn btn-primary w-full"
-              disabled={pending !== "" || !canCreateGroups}
-              onClick={quickPublish}
-              type="button"
-            >
-              {pending === "quick" ? "공개 중..." : "빠른 공개"}
-            </button>
-            <button
-              className="btn btn-secondary w-full"
-              disabled={pending !== "" || !canCreateGroups}
-              onClick={reviewMatching}
-              type="button"
-            >
-              {pending === "review" ? "편성 중..." : "검토 후 조정"}
-            </button>
-          </div>
+          <button
+            className="btn btn-primary w-full"
+            disabled={pending || total === 0}
+            onClick={startMatching}
+            type="button"
+          >
+            {pending ? "조 편성 중..." : "조 편성 시작"}
+          </button>
         )}
 
-        {message ? (
-          <p className="mt-4 rounded-[18px] bg-[#FEF3C7] px-4 py-3 text-sm font-bold text-[#92400E]">
-            {message}
-          </p>
-        ) : null}
-      </div>
+        {message ? <p className={styles.message}>{message}</p> : null}
+      </section>
 
-      <div className="soft-card p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-black tracking-[-0.04em]">목장별 현황</h2>
-          <span className="pill min-h-0 py-1 text-xs">{mokjangCounts.length}개</span>
+      <section className={`soft-card ${styles.section}`}>
+        <div className={styles.sectionHeader}>
+          <h2>목장별 출석</h2>
+          <span className="pill">{mokjangCounts.length}개</span>
         </div>
-        <div className="mt-4 grid gap-2">
+        <div className={styles.list}>
           {mokjangCounts.length > 0 ? (
             mokjangCounts.map((item) => (
-              <div
-                className="flex items-center justify-between rounded-[17px] border border-[var(--line)] bg-white px-4 py-3"
-                key={item.name}
-              >
+              <div className={styles.listRow} key={item.name}>
                 <strong>{item.name}</strong>
-                <span className="pill min-h-0 py-1 text-xs">{item.count}명</span>
+                <span>{item.count}명</span>
               </div>
             ))
           ) : (
-            <p className="text-sm font-semibold text-[var(--muted)]">아직 출석자가 없어요.</p>
+            <p className={styles.empty}>아직 출석자가 없어요.</p>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="soft-card p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-black tracking-[-0.04em]">최근 출석</h2>
-          <button className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" onClick={() => router.refresh()}>
+      <section className={`soft-card ${styles.section}`}>
+        <div className={styles.sectionHeader}>
+          <h2>최근 출석</h2>
+          <button className={styles.refreshButton} onClick={() => router.refresh()} type="button">
             새로고침
           </button>
         </div>
-        <div className="mt-4 grid gap-2">
+        <div className={styles.list}>
           {recent.length > 0 ? (
             recent.map((item) => (
-              <div
-                className="flex items-center justify-between gap-3 rounded-[17px] border border-[var(--line)] bg-white px-4 py-3"
-                key={item.id}
-              >
+              <div className={styles.attendanceRow} key={item.id}>
                 <span>
-                  <strong className="block">{item.name}</strong>
-                  <span className="text-xs font-bold text-[var(--muted)]">
+                  <strong>{item.name}</strong>
+                  <small>
                     {new Date(item.checkedInAt).toLocaleTimeString("ko-KR", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                  </span>
+                  </small>
                 </span>
-                <span className="pill min-h-0 py-1 text-xs">{item.mokjangName}</span>
+                <span className="pill">{item.mokjangName}</span>
               </div>
             ))
           ) : (
-            <p className="text-sm font-semibold text-[var(--muted)]">최근 출석자가 없어요.</p>
+            <p className={styles.empty}>최근 출석자가 없어요.</p>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="soft-card p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-black tracking-[-0.04em]">다시 시작</h2>
-            <p className="mt-2 text-sm font-bold leading-6 text-[var(--muted)]">
-              오늘 출석과 조 편성 결과를 지우고 처음부터 다시 받을 때만 사용하세요.
-            </p>
-          </div>
-          <span className="pill min-h-0 shrink-0 py-1 text-xs">{total}명</span>
-        </div>
-
-        {resetOpen ? (
-          <div className="mt-4 grid gap-3">
-            <input
-              className="field"
-              inputMode="text"
-              onChange={(event) => setResetText(event.target.value)}
-              placeholder="초기화 입력"
-              value={resetText}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                className="btn btn-ghost w-full"
-                disabled={pending !== ""}
-                onClick={() => {
-                  setResetOpen(false);
-                  setResetText("");
-                }}
-                type="button"
-              >
-                취소
-              </button>
-              <button
-                className="btn btn-danger w-full"
-                disabled={pending !== "" || resetText.trim() !== "초기화"}
-                onClick={resetAttendance}
-                type="button"
-              >
-                {pending === "reset" ? "초기화 중..." : "초기화"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            className="btn btn-danger mt-4 w-full"
-            disabled={pending !== "" || total === 0}
-            onClick={() => {
-              setMessage("");
-              setResetOpen(true);
-            }}
-            type="button"
-          >
-            출석명단 초기화
-          </button>
-        )}
-      </div>
+      {status === "confirmed" ? <ResetAttendanceControl /> : null}
     </section>
   );
 }

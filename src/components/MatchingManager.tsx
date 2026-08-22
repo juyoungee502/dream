@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ResetAttendanceControl } from "@/src/components/ResetAttendanceControl";
+import styles from "./MatchingManager.module.css";
 
 export type MatchingMember = {
   personId: string;
@@ -24,50 +26,94 @@ type MatchingManagerProps = {
 
 export function MatchingManager({ status, groups }: MatchingManagerProps) {
   const router = useRouter();
-  const [message, setMessage] = useState("");
+  const [displayGroups, setDisplayGroups] = useState(groups);
+  const [published, setPublished] = useState(status === "confirmed");
   const [pendingAction, setPendingAction] = useState("");
-  const [personId, setPersonId] = useState("");
-  const [fromGroupId, setFromGroupId] = useState("");
-  const [toGroupId, setToGroupId] = useState("");
-  const allMembers = groups.flatMap((group) =>
-    group.members.map((member) => ({ ...member, groupId: group.id })),
+  const [movingPersonId, setMovingPersonId] = useState("");
+  const [message, setMessage] = useState("");
+  const memberCount = useMemo(
+    () => displayGroups.reduce((total, group) => total + group.members.length, 0),
+    [displayGroups],
   );
-  const isConfirmed = status === "confirmed";
 
-  async function runAction(path: string, label: string, done?: () => void) {
+  useEffect(() => {
+    setDisplayGroups(groups);
+  }, [groups]);
+
+  useEffect(() => {
+    setPublished(status === "confirmed");
+  }, [status]);
+
+  async function startMatching() {
+    setPendingAction("start");
     setMessage("");
-    setPendingAction(label);
 
     try {
-      const response = await fetch(path, { method: "POST" });
-      const result = (await response.json()) as {
-        ok: boolean;
-        message?: string;
-        warnings?: string[];
-      };
+      const response = await fetch("/api/matching/start", { method: "POST" });
+      const result = (await response.json()) as { ok: boolean; message?: string };
 
       if (!response.ok || !result.ok) {
-        setMessage(result.message ?? "요청을 처리하지 못했어요.");
-        return;
+        throw new Error(result.message ?? "조 편성을 시작하지 못했어요.");
       }
 
-      if (result.warnings?.length) {
-        setMessage(result.warnings.join(" "));
-      }
-
-      done?.();
       router.refresh();
-    } catch {
-      setMessage("요청을 처리하지 못했어요.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "조 편성을 시작하지 못했어요.");
     } finally {
       setPendingAction("");
     }
   }
 
-  async function moveMember(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function publishGroups() {
+    setPendingAction("confirm");
     setMessage("");
-    setPendingAction("move");
+
+    try {
+      const response = await fetch("/api/matching/confirm", { method: "POST" });
+      const result = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message ?? "조 편성을 공개하지 못했어요.");
+      }
+
+      setPublished(true);
+      setMessage("조 편성이 공개됐어요.");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "조 편성을 공개하지 못했어요.");
+    } finally {
+      setPendingAction("");
+    }
+  }
+
+  async function moveMember(personId: string, fromGroupId: string, toGroupId: string) {
+    if (fromGroupId === toGroupId || movingPersonId) return;
+
+    const snapshot = displayGroups;
+    const sourceGroup = snapshot.find((group) => group.id === fromGroupId);
+    const targetGroup = snapshot.find((group) => group.id === toGroupId);
+    const member = sourceGroup?.members.find((item) => item.personId === personId);
+
+    if (!member || !targetGroup) return;
+
+    setMovingPersonId(personId);
+    setMessage("");
+    setDisplayGroups((current) =>
+      current.map((group) => {
+        if (group.id === fromGroupId) {
+          return {
+            ...group,
+            members: group.members.filter((item) => item.personId !== personId),
+          };
+        }
+
+        if (group.id === toGroupId) {
+          return { ...group, members: [...group.members, member] };
+        }
+
+        return group;
+      }),
+    );
 
     try {
       const response = await fetch("/api/matching/move-member", {
@@ -78,164 +124,125 @@ export function MatchingManager({ status, groups }: MatchingManagerProps) {
       const result = (await response.json()) as { ok: boolean; message?: string };
 
       if (!response.ok || !result.ok) {
-        setMessage(result.message ?? "조원을 이동하지 못했어요.");
-        return;
+        throw new Error(result.message ?? "조원을 이동하지 못했어요.");
       }
 
-      setPersonId("");
-      setFromGroupId("");
-      setToGroupId("");
+      setMessage(`${member.name}님을 ${targetGroup.groupNumber}조로 이동했어요.`);
       router.refresh();
-    } catch {
-      setMessage("조원을 이동하지 못했어요.");
+    } catch (error) {
+      setDisplayGroups(snapshot);
+      setMessage(error instanceof Error ? error.message : "조원을 이동하지 못했어요.");
     } finally {
-      setPendingAction("");
+      setMovingPersonId("");
     }
   }
 
-  function selectMember(value: string) {
-    setPersonId(value);
-    const member = allMembers.find((item) => item.personId === value);
-    setFromGroupId(member?.groupId ?? "");
-  }
-
   return (
-    <section className="grid gap-4">
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        <Link className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" href="/admin">
-          현황
+    <section className={styles.page}>
+      <nav className={styles.navigation} aria-label="관리자 메뉴">
+        <Link className={styles.navItem} href="/admin">
+          운영
         </Link>
-        <Link className="btn btn-ghost min-h-10 rounded-full px-4 text-sm" href="/admin/rules">
-          배정 금지
-        </Link>
-        <Link
-          className="btn btn-secondary min-h-10 rounded-full px-4 text-sm"
-          href="/admin/matching"
-        >
+        <Link className={`${styles.navItem} ${styles.active}`} href="/admin/matching">
           조 편성
         </Link>
-      </div>
+        <Link className={styles.navItem} href="/admin/rules">
+          배정 금지
+        </Link>
+      </nav>
 
-      <div className="soft-card p-5">
-        <div className="flex items-center justify-between gap-3">
+      <section className={`soft-card ${styles.overview}`}>
+        <div className={styles.overviewHeader}>
           <div>
-            <p className="text-sm font-black text-[var(--green-dark)]">자동 조 편성</p>
-            <h1 className="mt-1 text-[30px] font-black tracking-[-0.055em]">
-              편성 관리
-            </h1>
+            <p className={styles.kicker}>{published ? "공개 완료" : "조 편성 검토"}</p>
+            <h1>{published ? "조 편성이 공개됐어요" : "현재 편성된 조"}</h1>
           </div>
-          <span className="pill">{status}</span>
+          <span className="pill">{published ? "공개 중" : "검토 중"}</span>
         </div>
-        {isConfirmed ? (
-          <div className="mt-5 grid gap-3">
-            <div className="rounded-[22px] bg-[var(--green-soft)] px-4 py-4 text-[15px] font-black leading-6 text-[var(--green-dark)]">
-              최종 결과가 확정되어 참석자에게 공개 중입니다.
-            </div>
-            <button
-              className="btn btn-primary w-full"
-              disabled={pendingAction !== ""}
-              onClick={() => runAction("/api/matching/confirm", "confirm")}
-              type="button"
-            >
-              {pendingAction === "confirm" ? "확인 중..." : "최종 결과 확정 완료"}
-            </button>
-          </div>
-        ) : (
-          <div className="mt-5 grid gap-3">
-            <button
-              className="btn btn-secondary w-full"
-              disabled={pendingAction !== ""}
-              onClick={() => runAction("/api/matching/start", "start")}
-              type="button"
-            >
-              {pendingAction === "start" ? "편성 중..." : groups.length ? "다시 편성" : "자동 편성"}
-            </button>
-            <button
-              className="btn btn-primary w-full"
-              disabled={pendingAction !== "" || groups.length === 0}
-              onClick={() => runAction("/api/matching/confirm", "confirm")}
-              type="button"
-            >
-              {pendingAction === "confirm" ? "확정 중..." : "최종 결과 확정"}
-            </button>
-          </div>
-        )}
-        {message ? (
-          <p className="mt-4 rounded-[18px] bg-[#FEF3C7] px-4 py-3 text-sm font-bold text-[#92400E]">
-            {message}
-          </p>
-        ) : null}
-      </div>
 
-      {groups.length > 0 && !isConfirmed ? (
-        <form className="soft-card p-5" onSubmit={moveMember}>
-          <h2 className="text-xl font-black tracking-[-0.04em]">수동 조정</h2>
-          <div className="mt-4 grid gap-3">
-            <select
-              className="field"
-              value={personId}
-              onChange={(event) => selectMember(event.target.value)}
-            >
-              <option value="">이동할 조원 선택</option>
-              {allMembers.map((member) => (
-                <option key={`${member.groupId}-${member.personId}`} value={member.personId}>
-                  {member.name} · {member.mokjangName}
-                </option>
-              ))}
-            </select>
-            <select
-              className="field"
-              value={toGroupId}
-              onChange={(event) => setToGroupId(event.target.value)}
-            >
-              <option value="">이동할 조 선택</option>
-              {groups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.groupNumber}조
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className={styles.metrics}>
+          <span>
+            <strong>{displayGroups.length}</strong>개 조
+          </span>
+          <span>
+            <strong>{memberCount}</strong>명
+          </span>
+        </div>
+
+        {displayGroups.length === 0 && !published ? (
           <button
-            className="btn btn-ghost mt-4 w-full"
-            disabled={pendingAction !== "" || status === "confirmed"}
-            type="submit"
+            className="btn btn-primary w-full"
+            disabled={pendingAction !== ""}
+            onClick={startMatching}
+            type="button"
           >
-            {pendingAction === "move" ? "이동 중..." : "조원 이동"}
+            {pendingAction === "start" ? "조 편성 중..." : "조 편성 시작"}
           </button>
-        </form>
-      ) : null}
+        ) : null}
 
-      <div className="grid gap-3">
-        {groups.map((group) => (
-          <article className="soft-card p-5" key={group.id}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-black text-[var(--green-dark)]">
-                {group.groupNumber}조
-              </h2>
-              <span className="pill min-h-0 py-1 text-xs">{group.members.length}명</span>
-            </div>
-            <div className="grid gap-2">
+        {message ? <p className={styles.message}>{message}</p> : null}
+      </section>
+
+      <div className={styles.groupList}>
+        {displayGroups.map((group) => (
+          <article className={`soft-card ${styles.groupCard}`} key={group.id}>
+            <header className={styles.groupHeader}>
+              <h2>{group.groupNumber}조</h2>
+              <span>{group.members.length}명</span>
+            </header>
+
+            <div className={styles.memberList}>
               {group.members.map((member) => (
-                <div
-                  className="flex items-center justify-between gap-3 rounded-[17px] border border-[var(--line)] bg-white px-4 py-3"
-                  key={member.personId}
-                >
-                  <strong>{member.name}</strong>
-                  <span className="pill min-h-0 py-1 text-xs">{member.mokjangName}</span>
+                <div className={styles.memberRow} key={member.personId}>
+                  <span className={styles.memberIdentity}>
+                    <strong>{member.name}</strong>
+                    <small>{member.mokjangName}</small>
+                  </span>
+
+                  {published ? (
+                    <span className={styles.groupLabel}>{group.groupNumber}조</span>
+                  ) : (
+                    <select
+                      aria-label={`${member.name} 이동할 조`}
+                      className={styles.groupSelect}
+                      disabled={movingPersonId !== "" || pendingAction !== ""}
+                      onChange={(event) =>
+                        moveMember(member.personId, group.id, event.target.value)
+                      }
+                      value={group.id}
+                    >
+                      {displayGroups.map((optionGroup) => (
+                        <option key={optionGroup.id} value={optionGroup.id}>
+                          {optionGroup.groupNumber}조
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               ))}
+
+              {group.members.length === 0 ? (
+                <p className={styles.emptyGroup}>조원이 없어요.</p>
+              ) : null}
             </div>
           </article>
         ))}
-        {groups.length === 0 ? (
-          <div className="soft-card p-5 text-center">
-            <p className="font-semibold text-[var(--muted)]">
-              아직 생성된 조 편성이 없어요.
-            </p>
-          </div>
-        ) : null}
       </div>
+
+      {displayGroups.length > 0 && !published ? (
+        <div className={styles.publishBar}>
+          <button
+            className="btn btn-primary w-full"
+            disabled={pendingAction !== "" || movingPersonId !== ""}
+            onClick={publishGroups}
+            type="button"
+          >
+            {pendingAction === "confirm" ? "공개 중..." : "확정하고 바로 공개"}
+          </button>
+        </div>
+      ) : null}
+
+      {published ? <ResetAttendanceControl /> : null}
     </section>
   );
 }
