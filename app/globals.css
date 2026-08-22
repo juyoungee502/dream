@@ -237,7 +237,7 @@ button {
   height: 100vh;
   height: 100dvh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
   background: #faf9f5;
@@ -245,7 +245,8 @@ button {
 
 .splash-page1-frame {
   position: relative;
-  width: 100vw;
+  width: min(100vw, calc(100vh * 853 / 1844));
+  width: min(100vw, calc(100dvh * 853 / 1844));
   aspect-ratio: 853 / 1844;
   flex: 0 0 auto;
 }
