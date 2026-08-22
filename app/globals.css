@@ -231,354 +231,60 @@ button {
   animation: splash-progress 1.35s linear forwards;
 }
 
-.splash-page {
-  width: 100%;
+.splash-map-screen {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
+  align-items: center;
   justify-content: center;
+  padding: 0;
   overflow: hidden;
-  background: #e6ebe5;
 }
 
-.splash-experience {
-  width: min(430px, 100%);
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 0 42px rgb(39 54 43 / 14%);
-}
-
-.splash-hero-photo {
+.splash-map-card {
   position: relative;
-  height: clamp(174px, 25dvh, 232px);
+  width: min(100%, calc(100dvh * 884 / 1841));
+  max-width: 430px;
+  aspect-ratio: 884 / 1841;
   flex: 0 0 auto;
-  overflow: hidden;
-  background: #d9ded8;
 }
 
-.splash-hero-image {
-  object-fit: cover;
-  object-position: 50% 49%;
+.splash-map-image {
+  object-fit: contain;
 }
 
-.splash-photo-shade {
+.splash-route-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(18 31 23 / 4%) 52%, rgb(16 28 19 / 23%) 100%);
-  pointer-events: none;
-}
-
-.splash-brand-mark {
-  position: absolute;
-  top: max(12px, env(safe-area-inset-top));
-  left: 50%;
-  width: 58px;
-  height: 58px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgb(255 255 255 / 88%);
-  border-radius: 50%;
-  background: rgb(255 255 255 / 94%);
-  color: #33533a;
-  font-size: 7px;
-  font-weight: 950;
-  line-height: 1.1;
-  transform: translateX(-50%);
-  box-shadow: 0 7px 20px rgb(14 34 20 / 17%);
-}
-
-.splash-brand-mark i {
-  width: 6px;
-  height: 13px;
-  margin: 2px 0;
-  border-radius: 6px 6px 2px 2px;
-  background: #78966c;
-}
-
-.splash-heading {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  padding: 8px 16px 7px;
-  text-align: center;
-  background: #fff;
-}
-
-.splash-heading p {
-  margin: 0 0 4px;
-  color: #52735a;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.splash-heading h1 {
-  margin: 0;
-  color: #171b18;
-  font-size: 42px;
-  font-weight: 950;
-  line-height: 0.84;
-  letter-spacing: 0;
-}
-
-.splash-journey {
-  position: relative;
-  min-height: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
-  background:
-    linear-gradient(90deg, transparent 49.7%, rgb(100 135 101 / 5%) 50%, transparent 50.3%),
-    #f9faf7;
-}
-
-.journey-route {
-  position: absolute;
-  z-index: 0;
-  inset: 4px 0;
   width: 100%;
-  height: calc(100% - 8px);
-  overflow: visible;
+  height: 100%;
   pointer-events: none;
 }
 
-#journey-route-path {
-  fill: none;
-  stroke: none;
-}
-
-.journey-route-track,
-.journey-route-progress {
-  fill: none;
+.splash-route-shadow {
+  stroke: rgb(255 255 255 / 78%);
+  stroke-width: 18;
   stroke-linecap: round;
   stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 5px 8px rgb(50 61 45 / 16%));
 }
 
-.journey-route-track {
-  stroke: #e4e8df;
-  stroke-width: 8;
-  filter: drop-shadow(0 3px 4px rgb(61 76 61 / 12%));
-}
-
-.journey-route-progress {
-  stroke: #5e9564;
-  stroke-width: 5;
+.splash-route-progress {
+  stroke: #5b9560;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: journey-route-load 1.55s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation: splash-route-load 1.35s cubic-bezier(0.42, 0, 0.18, 1) forwards;
+  filter: drop-shadow(0 4px 7px rgb(27 82 45 / 22%));
 }
 
-.journey-route-marker {
-  fill: #fff;
-  stroke: #4e8656;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 2px 3px rgb(38 80 47 / 25%));
-}
-
-.ranch-stops {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  display: grid;
-  grid-template-rows: repeat(12, minmax(0, 1fr));
-  margin: 0;
-  padding: 4px 0;
-  list-style: none;
-}
-
-.ranch-stop {
-  position: relative;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-}
-
-.ranch-stop-left {
-  padding-right: calc(50% + 28px);
-  justify-content: flex-end;
-}
-
-.ranch-stop-right {
-  padding-left: calc(50% + 28px);
-  justify-content: flex-start;
-}
-
-.ranch-stop-content {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.ranch-stop-left .ranch-stop-content {
-  flex-direction: row-reverse;
-}
-
-.ranch-person {
-  --person-hair: #49382f;
-  --person-outfit: #8da286;
-  --person-skin: #f1c29d;
-  position: relative;
-  width: 34px;
-  height: 38px;
-  flex: 0 0 34px;
-}
-
-.ranch-person::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -4px;
-  border-radius: 50%;
-  background: #f9faf7;
-}
-
-.ranch-person-hair {
-  position: absolute;
-  z-index: 1;
-  top: 1px;
-  left: 7px;
-  width: 20px;
-  height: 17px;
-  border-radius: 11px 11px 7px 7px;
-  background: var(--person-hair);
-}
-
-.ranch-person-long-hair .ranch-person-hair {
-  left: 6px;
-  width: 22px;
-  height: 23px;
-  border-radius: 12px 12px 9px 9px;
-}
-
-.ranch-person-head {
-  position: absolute;
-  z-index: 2;
-  top: 5px;
-  left: 9px;
-  width: 16px;
-  height: 15px;
-  border-radius: 48% 48% 44% 44%;
-  background: var(--person-skin);
-}
-
-.ranch-person-head::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -1px;
-  width: 18px;
-  height: 7px;
-  border-radius: 9px 9px 5px 4px;
-  background: var(--person-hair);
-  transform: rotate(-5deg);
-}
-
-.ranch-person-face {
-  position: absolute;
-  top: 7px;
-  left: 4px;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: #2d2927;
-  box-shadow: 6px 0 #2d2927;
-}
-
-.ranch-person-face::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 3px;
-  width: 4px;
-  height: 2px;
-  border-bottom: 1px solid #a5635a;
-  border-radius: 50%;
-}
-
-.ranch-person-body {
-  position: absolute;
-  z-index: 3;
-  top: 19px;
-  left: 7px;
-  width: 20px;
-  height: 15px;
-  border-radius: 8px 8px 4px 4px;
-  background: var(--person-outfit);
-}
-
-.ranch-person-body::after {
-  content: "";
-  position: absolute;
-  top: 13px;
-  left: 4px;
-  width: 5px;
-  height: 6px;
-  border-radius: 0 0 3px 3px;
-  background: #7f826f;
-  box-shadow: 7px 0 #7f826f;
-}
-
-.ranch-person-arm {
-  position: absolute;
-  z-index: 2;
-  top: 21px;
-  width: 6px;
-  height: 13px;
-  border: 3px solid var(--person-outfit);
-  border-top: 0;
-  border-radius: 0 0 7px 7px;
-}
-
-.ranch-person-arm-left {
-  left: 3px;
-  transform: rotate(8deg);
-}
-
-.ranch-person-arm-right {
-  right: 3px;
-  transform: rotate(-8deg);
-}
-
-.ranch-name {
-  min-width: 60px;
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 7px;
-  border: 1px solid #d7dfd3;
-  border-radius: 6px;
-  background: rgb(255 255 255 / 96%);
-  color: #253128;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 2px 7px rgb(53 72 55 / 6%);
-}
-
-.ranch-name small {
-  color: #69806c;
-  font-size: 8px;
-  font-weight: 800;
-}
-
-.ranch-name-new {
-  border-color: #a9bda6;
-  color: #31563a;
-}
-
-.ranch-name-new b {
-  color: #4d8656;
-  font-size: 13px;
+.splash-route-marker {
+  fill: #fbfff9;
+  stroke: #5b9560;
+  stroke-width: 5;
+  filter: drop-shadow(0 5px 8px rgb(27 82 45 / 24%));
 }
 
 .splash-cta {
@@ -612,56 +318,16 @@ button {
   }
 }
 
-@keyframes journey-route-load {
+@keyframes splash-route-load {
   to {
     stroke-dashoffset: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .journey-route-progress {
+  .splash-route-progress {
     animation: none;
     stroke-dashoffset: 0;
-  }
-}
-
-@media (max-height: 740px) {
-  .splash-hero-photo {
-    height: 168px;
-  }
-
-  .splash-heading {
-    padding-block: 5px;
-  }
-
-  .splash-heading p {
-    margin-bottom: 2px;
-    font-size: 11px;
-  }
-
-  .splash-heading h1 {
-    font-size: 35px;
-  }
-
-  .ranch-person {
-    width: 29px;
-    height: 34px;
-    flex-basis: 29px;
-    transform: scale(0.88);
-  }
-
-  .ranch-stop-left {
-    padding-right: calc(50% + 24px);
-  }
-
-  .ranch-stop-right {
-    padding-left: calc(50% + 24px);
-  }
-
-  .ranch-name {
-    min-width: 55px;
-    padding: 3px 5px;
-    font-size: 10px;
   }
 }
 
