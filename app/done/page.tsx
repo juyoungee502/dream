@@ -1,6 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/src/components/AppShell";
+import doneCharacter from "@/src/img/done-character.png";
+import styles from "./done.module.css";
 
 type DonePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -16,21 +19,27 @@ export default async function DonePage({ searchParams }: DonePageProps) {
 
   return (
     <AppShell status="출석 완료">
-      <section className="soft-card mt-10 p-6 text-center">
-        <div className="mx-auto mb-5 grid h-[92px] w-[92px] place-items-center rounded-full bg-[var(--green)] text-5xl font-black text-white shadow-[0_16px_35px_rgb(8_127_80_/_24%)]">
-          ✓
+      <section className={`soft-card ${styles.card}`}>
+        <div className={styles.visual}>
+          <Image
+            src={doneCharacter}
+            alt="초록색 옷을 입고 가방을 멘 캐릭터"
+            className={styles.character}
+            sizes="(max-width: 430px) 48vw, 210px"
+            preload
+          />
+          <span className={styles.check} aria-label="출석 확인 완료">
+            ✓
+          </span>
         </div>
-        <h1 className="text-[30px] font-black tracking-[-0.05em]">출석 완료!</h1>
-        <p className="mt-4 text-[16px] font-semibold leading-7 text-[var(--muted)]">
+        <h1 className={styles.title}>출석 완료!</h1>
+        <p className={styles.description}>
           오늘 산모임 출석이 완료되었어요.
           <br />
           관리자가 조를 매칭하면 결과를 볼 수 있어요.
         </p>
-        <div className="mt-6 rounded-[22px] bg-[var(--green-soft)] px-4 py-4 text-[15px] font-black leading-6 text-[var(--green-dark)]">
-          관리자 확인 후 조 편성이 확정됩니다.
-        </div>
         <Link
-          className="btn btn-primary mt-6 w-full"
+          className={`btn btn-primary ${styles.button}`}
           href={`/waiting?attendanceId=${encodeURIComponent(attendanceId)}`}
         >
           조 편성 기다리기
@@ -39,4 +48,3 @@ export default async function DonePage({ searchParams }: DonePageProps) {
     </AppShell>
   );
 }
-

@@ -1,0 +1,135 @@
+.card {
+  min-height: calc(100dvh - 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 34px 28px 30px;
+  text-align: center;
+}
+
+.visual {
+  position: relative;
+  width: min(100%, 300px);
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.character {
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 13px rgb(44 54 45 / 10%));
+}
+
+.check {
+  position: absolute;
+  right: 2px;
+  top: 42%;
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #4c8059;
+  color: #fff;
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 15px 30px rgb(45 94 59 / 20%);
+}
+
+.title {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 38px;
+  font-weight: 950;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.description {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.button {
+  width: 100%;
+  min-height: 64px;
+  margin-top: 30px;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+@media (max-width: 460px) {
+  .card {
+    min-height: calc(100dvh - 96px);
+    margin-top: 4px;
+    padding: 24px 20px 22px;
+    border-radius: 26px;
+  }
+
+  .visual {
+    width: min(100%, 260px);
+    height: min(35dvh, 286px);
+    min-height: 238px;
+    margin-bottom: 18px;
+  }
+
+  .check {
+    right: 0;
+    width: 82px;
+    height: 82px;
+    font-size: 52px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .description {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .button {
+    min-height: 58px;
+    margin-top: 24px;
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 720px) {
+  .card {
+    padding-block: 18px;
+  }
+
+  .visual {
+    height: 220px;
+    min-height: 220px;
+    margin-bottom: 12px;
+  }
+
+  .check {
+    width: 72px;
+    height: 72px;
+    font-size: 46px;
+  }
+
+  .description {
+    margin-top: 12px;
+  }
+
+  .button {
+    margin-top: 18px;
+  }
+}
