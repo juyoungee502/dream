@@ -604,6 +604,148 @@ button {
   .content-pad {
     padding: max(16px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
   }
+}
+
+.checkin-shell .content-pad {
+  padding: max(12px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+}
+
+  .checkin-shell .app-header {
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .checkin-shell .brand {
+    gap: 9px;
+  }
+
+  .checkin-shell .brand-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .checkin-shell .brand-title {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .brand-subtitle {
+    margin-top: 2px;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .pill {
+    min-height: 30px;
+    gap: 6px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .checkin-shell .dot {
+    width: 7px;
+    height: 7px;
+    box-shadow: 0 0 0 3px rgb(8 127 80 / 10%);
+  }
+
+  .checkin-shell .hero-copy {
+    margin: 0 0 14px;
+    padding: 10px 2px 0;
+  }
+
+  .checkin-shell .hero-kicker {
+    margin-bottom: 10px;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .hero-title {
+    font-size: 31px;
+    line-height: 1.02;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .hero-desc {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .checkin-card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .checkin-shell .form-block + .form-block {
+    margin-top: 16px;
+  }
+
+  .checkin-shell .field-title {
+    margin-bottom: 8px;
+  }
+
+  .checkin-shell .field-title label,
+  .checkin-shell .field-title > span:first-child {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .field-title > span:last-child {
+    font-size: 11px;
+  }
+
+  .checkin-shell .field {
+    height: 52px;
+    border-radius: 16px;
+    font-size: 17px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .grid-mokjang {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .checkin-shell .mokjang-button {
+    height: 46px;
+    border-radius: 14px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .selection-bar {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .checkin-shell .form-message {
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+
+  .checkin-shell .cta-stack {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .checkin-shell .btn {
+    min-height: 54px;
+    border-radius: 16px;
+    font-size: 16px;
+    letter-spacing: 0;
+  }
+
+.checkin-shell .admin-text-link {
+  font-size: 12px;
+}
+
+@media (max-width: 460px) {
 
   .hero-kicker {
     margin-bottom: 24px;

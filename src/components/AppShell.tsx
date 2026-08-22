@@ -7,12 +7,13 @@ type AppShellProps = {
   status?: string;
   backHref?: string;
   admin?: boolean;
+  shellClassName?: string;
 };
 
-export function AppShell({ children, status, backHref, admin }: AppShellProps) {
+export function AppShell({ children, status, backHref, admin, shellClassName }: AppShellProps) {
   return (
     <main className="app-bg">
-      <div className="phone-shell">
+      <div className={`phone-shell${shellClassName ? ` ${shellClassName}` : ""}`}>
         <div className="content-pad">
           <header className="app-header">
             <Link href={admin ? "/admin" : "/check-in"} className="brand">
@@ -46,4 +47,3 @@ export function AppShell({ children, status, backHref, admin }: AppShellProps) {
     </main>
   );
 }
-

@@ -16,7 +16,7 @@ export default async function CheckInPage() {
   const mokjangs = mokjangsResult?.data ?? [];
 
   return (
-    <AppShell status="출석 접수 중">
+    <AppShell status="접수 중" shellClassName="checkin-shell">
       <section className="hero-copy">
         <p className="hero-kicker">WE ARE DREAMERS</p>
         <h1 className="hero-title">
