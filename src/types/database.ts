@@ -94,18 +94,21 @@ export type Database = {
           id: string;
           event_id: string;
           person_id: string;
+          avatar_id: number | null;
           checked_in_at: string;
         };
         Insert: {
           id?: string;
           event_id: string;
           person_id: string;
+          avatar_id?: number | null;
           checked_in_at?: string;
         };
         Update: {
           id?: string;
           event_id?: string;
           person_id?: string;
+          avatar_id?: number | null;
           checked_in_at?: string;
         };
         Relationships: [

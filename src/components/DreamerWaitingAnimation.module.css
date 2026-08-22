@@ -1,52 +1,111 @@
 .card {
-  margin-top: 48px;
-  padding: 24px;
+  margin-top: 36px;
+  padding: 22px;
   text-align: center;
 }
 
 .card .spinner {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 20px;
-  border-width: 4px;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 16px;
+  border-width: 3px;
 }
 
 .title {
   color: var(--foreground);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1.2;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
+}
+
+.pickerCopy {
+  margin-top: 18px;
+}
+
+.eyebrow {
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
 .description {
-  min-height: 28px;
-  margin-top: 14px;
+  margin-top: 3px;
   color: var(--muted);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.75;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
-.dreamers {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  min-height: 108px;
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 16px;
-  gap: clamp(4px, 2vw, 10px);
+  gap: clamp(6px, 2vw, 10px);
 }
 
-.dreamer {
+.avatarButton {
   position: relative;
-  flex: 0 0 clamp(54px, 16vw, 72px);
-  width: clamp(54px, 16vw, 72px);
-  aspect-ratio: 2 / 3;
-  animation: dreamer-enter 360ms ease-out both;
+  min-width: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--green-pale);
+  cursor: pointer;
+  transform: scale(1);
+  transition:
+    border-color 180ms ease-out,
+    background-color 180ms ease-out,
+    transform 180ms ease-out;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.dreamerImage {
+.avatarButton:active {
+  transform: scale(0.97);
+}
+
+.avatarButton:focus-visible {
+  outline: 3px solid rgb(8 127 80 / 24%);
+  outline-offset: 2px;
+}
+
+.avatarButton.selected {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
+.avatarImage {
+  padding: 5px;
   object-fit: contain;
+}
+
+.check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hint {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
 }
 
 .statusMessage {
@@ -61,43 +120,27 @@
   border: 0;
 }
 
-@keyframes dreamer-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @media (max-width: 460px) {
   .card {
-    margin-top: 36px;
-    padding: 22px 18px;
+    margin-top: 28px;
+    padding: 20px 16px;
   }
 
   .title {
-    font-size: 25px;
-    letter-spacing: 0;
+    font-size: 24px;
   }
 
   .description {
-    margin-top: 12px;
-    font-size: 15px;
-    letter-spacing: 0;
+    font-size: 14px;
   }
 
-  .dreamers {
-    min-height: 96px;
-    margin-top: 14px;
+  .avatarButton {
+    border-radius: 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dreamer {
-    animation: none;
+  .avatarButton {
+    transition: none;
   }
 }

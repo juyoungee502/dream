@@ -60,5 +60,10 @@ export function WaitingScreen({ attendanceId }: WaitingScreenProps) {
     };
   }, [attendanceId, router]);
 
-  return <DreamerWaitingAnimation statusMessage={message} />;
+  return (
+    <DreamerWaitingAnimation
+      attendanceId={attendanceId}
+      statusMessage={message}
+    />
+  );
 }
