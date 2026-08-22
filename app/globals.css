@@ -660,8 +660,9 @@ button {
   }
 
   .checkin-shell .hero-title {
-    font-size: 31px;
-    line-height: 1.02;
+    font-size: 36px;
+    font-weight: 950;
+    line-height: 1;
     letter-spacing: 0;
   }
 
@@ -710,7 +711,8 @@ button {
   .checkin-shell .mokjang-button {
     height: 46px;
     border-radius: 14px;
-    font-size: 13px;
+    font-size: 15px;
+    font-weight: 950;
     letter-spacing: 0;
   }
 
