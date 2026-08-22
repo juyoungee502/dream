@@ -189,7 +189,7 @@ button {
   border-radius: 999px;
   background: var(--green-soft);
   color: var(--green-dark);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 950;
   line-height: 1.2;
 }
@@ -206,7 +206,7 @@ button {
 .splash-desc {
   margin: 22px 0 0;
   color: #7a8591;
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 800;
   line-height: 1.5;
   letter-spacing: -0.02em;

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import splash2026 from "@/src/img/2026s.jpg";
 
 export function SplashScreen() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function SplashScreen() {
         <section className="splash-wrap">
           <div className="splash-photo-card">
             <Image
-              src="/splash.jpg"
+              src={splash2026}
               alt="산모임"
               fill
               sizes="(max-width: 460px) calc(100vw - 32px), 380px"
