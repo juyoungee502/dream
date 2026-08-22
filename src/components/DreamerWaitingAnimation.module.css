@@ -1,0 +1,103 @@
+.card {
+  margin-top: 48px;
+  padding: 24px;
+  text-align: center;
+}
+
+.card .spinner {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 20px;
+  border-width: 4px;
+}
+
+.title {
+  color: var(--foreground);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+}
+
+.description {
+  min-height: 28px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.75;
+}
+
+.dreamers {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 108px;
+  margin-top: 16px;
+  gap: clamp(4px, 2vw, 10px);
+}
+
+.dreamer {
+  position: relative;
+  flex: 0 0 clamp(54px, 16vw, 72px);
+  width: clamp(54px, 16vw, 72px);
+  aspect-ratio: 2 / 3;
+  animation: dreamer-enter 360ms ease-out both;
+}
+
+.dreamerImage {
+  object-fit: contain;
+}
+
+.statusMessage {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes dreamer-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 460px) {
+  .card {
+    margin-top: 36px;
+    padding: 22px 18px;
+  }
+
+  .title {
+    font-size: 25px;
+    letter-spacing: 0;
+  }
+
+  .description {
+    margin-top: 12px;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  .dreamers {
+    min-height: 96px;
+    margin-top: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dreamer {
+    animation: none;
+  }
+}

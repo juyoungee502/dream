@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { DreamerWaitingAnimation } from "@/src/components/DreamerWaitingAnimation";
 
 type WaitingScreenProps = {
   attendanceId: string;
@@ -59,16 +60,5 @@ export function WaitingScreen({ attendanceId }: WaitingScreenProps) {
     };
   }, [attendanceId, router]);
 
-  return (
-    <section className="soft-card mt-12 p-6 text-center">
-      <div className="mx-auto mb-6 spinner" />
-      <h1 className="text-[28px] font-black tracking-[-0.05em]">
-        조 편성 대기 중...
-      </h1>
-      <p className="mt-4 text-[16px] font-semibold leading-7 text-[var(--muted)]">
-        {message}
-      </p>
-    </section>
-  );
+  return <DreamerWaitingAnimation statusMessage={message} />;
 }
-
