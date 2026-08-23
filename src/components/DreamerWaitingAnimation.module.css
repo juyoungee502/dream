@@ -186,11 +186,18 @@
   }
 
   .title {
-    font-size: 27px;
+    font-size: 30px;
+    font-weight: 950;
+  }
+
+  .eyebrow {
+    font-size: 17px;
+    font-weight: 900;
   }
 
   .description {
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 950;
   }
 
   .avatarButton {

@@ -17,7 +17,9 @@
 }
 
 .shell :global(.brand-title) {
-  font-size: 15px;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0;
 }
 
 .shell :global(.brand-subtitle) {
@@ -43,7 +45,7 @@
   }
 
   .shell :global(.brand-title) {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .shell :global(.pill) {
