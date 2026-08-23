@@ -23,6 +23,7 @@ const MOKJANG_DISPLAY_ORDER = [
   "예은 목장",
   "석민 목장",
   "새가족 목장",
+  "소망 목장",
 ] as const;
 
 export function CheckInForm({ mokjangs }: CheckInFormProps) {

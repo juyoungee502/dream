@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import splashPage from "@/src/img/page1.png";
+import styles from "./SplashScreen.module.css";
 
 export function SplashScreen() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export function SplashScreen() {
 
   return (
     <main className="splash-page1-screen" aria-label="WE ARE DREAMERS 로딩 화면">
-      <div className="splash-page1-frame">
+      <div className={`splash-page1-frame ${styles.frame}`}>
         <Image
           src={splashPage}
           alt="WE ARE DREAMERS 산모임 목장 안내"

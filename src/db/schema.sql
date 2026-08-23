@@ -21,7 +21,8 @@ insert into mokjangs (name, sort_order) values
 ('은서 목장', 10),
 ('예서 목장', 11),
 ('민경 목장', 12),
-('새가족 목장', 13)
+('새가족 목장', 13),
+('소망 목장', 14)
 on conflict (name) do update set
   sort_order = excluded.sort_order,
   is_active = true;
@@ -41,7 +42,8 @@ where name not in (
   '은서 목장',
   '예서 목장',
   '민경 목장',
-  '새가족 목장'
+  '새가족 목장',
+  '소망 목장'
 );
 
 create table if not exists events (

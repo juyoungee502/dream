@@ -12,6 +12,7 @@ export const MOKJANGS = [
   "예서 목장",
   "민경 목장",
   "새가족 목장",
+  "소망 목장",
 ] as const;
 
 export type MokjangOption = {

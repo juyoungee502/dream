@@ -1,0 +1,5 @@
+.frame {
+  overflow: hidden;
+  border-radius: clamp(20px, 5.5vw, 28px);
+  background: #f6f2ef;
+}
