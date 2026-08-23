@@ -1,4 +1,7 @@
 alter table public.attendances
+  add column if not exists avatar_id integer;
+
+alter table public.attendances
   drop constraint if exists attendances_avatar_id_range;
 
 alter table public.attendances
