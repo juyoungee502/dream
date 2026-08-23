@@ -73,7 +73,7 @@ create table if not exists attendances (
   person_id uuid not null references people(id),
   avatar_id integer,
   checked_in_at timestamptz not null default now(),
-  constraint attendances_avatar_id_range check (avatar_id between 1 and 16),
+  constraint attendances_avatar_id_range check (avatar_id between 1 and 17),
   constraint unique_attendance_per_event unique (event_id, person_id)
 );
 

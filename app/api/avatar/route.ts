@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DREAMER_AVATAR_COUNT } from "@/src/lib/dreamer-avatar-config";
 import { createAdminSupabase } from "@/src/lib/supabase/admin";
 
 type AvatarBody = {
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     typeof avatarId !== "number" ||
     !Number.isInteger(avatarId) ||
     avatarId < 1 ||
-    avatarId > 16
+    avatarId > DREAMER_AVATAR_COUNT
   ) {
     return NextResponse.json(
       { ok: false, message: "캐릭터 번호를 확인해주세요." },

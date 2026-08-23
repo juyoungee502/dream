@@ -143,7 +143,7 @@
 .avatarSlot {
   display: flex;
   width: 100%;
-  height: clamp(92px, 25vw, 116px);
+  height: clamp(104px, 30vw, 128px);
   align-items: flex-end;
   justify-content: center;
 }
