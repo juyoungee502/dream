@@ -16,6 +16,7 @@ import avatar14 from "@/src/img/14_polarbear.png";
 import avatar15 from "@/src/img/15_squirrel.png";
 import avatar16 from "@/src/img/16_elephant.png";
 import avatar17 from "@/src/img/17_koala.png";
+import avatar18 from "@/src/img/18_dreamer.png";
 import {
   DREAMER_AVATAR_COUNT,
   DREAMERS_PER_SET,
@@ -41,6 +42,7 @@ const DREAMER_AVATARS: Record<number, StaticImageData> = {
   15: avatar15,
   16: avatar16,
   17: avatar17,
+  18: avatar18,
 };
 
 type DreamerMember = {

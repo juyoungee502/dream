@@ -159,7 +159,9 @@ export function GroupResult({ attendanceId }: { attendanceId: string }) {
                     src={getDreamerImage(avatarId)}
                     alt=""
                     sizes="(max-width: 460px) 24vw, 90px"
-                    className={styles.avatar}
+                    className={`${styles.avatar}${
+                      avatarId === 18 ? ` ${styles.portraitAvatar}` : ""
+                    }`}
                   />
                 </div>
                 <div className={styles.memberName}>

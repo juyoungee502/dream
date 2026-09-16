@@ -108,6 +108,11 @@
   object-position: center bottom;
 }
 
+.portraitAvatar {
+  transform: scale(1.18);
+  transform-origin: center bottom;
+}
+
 .check {
   position: absolute;
   top: 3px;

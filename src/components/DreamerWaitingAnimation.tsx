@@ -83,7 +83,9 @@ export function DreamerWaitingAnimation({
                 alt=""
                 loading="eager"
                 sizes="(max-width: 460px) 21vw, 82px"
-                className={styles.avatarImage}
+                className={`${styles.avatarImage}${
+                  avatarId === 18 ? ` ${styles.portraitAvatar}` : ""
+                }`}
               />
               {selected ? (
                 <span className={styles.check} aria-hidden="true">
