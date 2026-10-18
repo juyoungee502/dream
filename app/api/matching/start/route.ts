@@ -3,6 +3,7 @@ import { requireAdmin } from "@/src/lib/admin-auth";
 import {
   createMatchingGroups,
   type Attendee,
+  type RecentPairing,
   type SeparationRule,
 } from "@/src/lib/matching";
 import { createAdminSupabase } from "@/src/lib/supabase/admin";
@@ -18,6 +19,9 @@ type AttendanceRow = {
       }
     | null;
 };
+
+const RECENT_EVENT_PENALTIES = [8, 4, 2, 1] as const;
+const EVENT_LOOKBACK_LIMIT = 8;
 
 export async function POST() {
   const auth = await requireAdmin();
@@ -81,6 +85,7 @@ export async function POST() {
     .from("separation_rules")
     .select("person_a_id,person_b_id");
 
+  const recentPairings = await getRecentPairings(supabase, event.id);
   const result = createMatchingGroups(
     attendees,
     (rules ?? []).map(
@@ -89,6 +94,7 @@ export async function POST() {
         personBId: rule.person_b_id,
       }),
     ),
+    recentPairings,
   );
 
   await supabase.from("small_groups").delete().eq("event_id", event.id);
@@ -142,5 +148,102 @@ export async function POST() {
   }
 
   return NextResponse.json({ ok: true, warnings: result.warnings });
+}
+
+async function getRecentPairings(
+  supabase: NonNullable<ReturnType<typeof createAdminSupabase>>,
+  currentEventId: string,
+): Promise<RecentPairing[]> {
+  const { data: events, error: eventsError } = await supabase
+    .from("events")
+    .select("id")
+    .eq("status", "confirmed")
+    .neq("id", currentEventId)
+    .order("event_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(EVENT_LOOKBACK_LIMIT);
+
+  if (eventsError || !events?.length) {
+    if (eventsError) {
+      console.error("Failed to load recent matching events", eventsError);
+    }
+    return [];
+  }
+
+  const eventIds = events.map((event) => event.id);
+  const { data: groups, error: groupsError } = await supabase
+    .from("small_groups")
+    .select("id,event_id")
+    .in("event_id", eventIds)
+    .eq("is_confirmed", true);
+
+  if (groupsError || !groups?.length) {
+    if (groupsError) {
+      console.error("Failed to load recent matching groups", groupsError);
+    }
+    return [];
+  }
+
+  const groupIds = groups.map((group) => group.id);
+  const { data: memberships, error: membershipsError } = await supabase
+    .from("small_group_members")
+    .select("small_group_id,person_id")
+    .in("small_group_id", groupIds);
+
+  if (membershipsError || !memberships?.length) {
+    if (membershipsError) {
+      console.error("Failed to load recent matching members", membershipsError);
+    }
+    return [];
+  }
+
+  const eventIdByGroupId = new Map(
+    groups.map((group) => [group.id, group.event_id]),
+  );
+  const memberIdsByGroupId = new Map<string, string[]>();
+
+  for (const membership of memberships) {
+    const memberIds = memberIdsByGroupId.get(membership.small_group_id) ?? [];
+    memberIds.push(membership.person_id);
+    memberIdsByGroupId.set(membership.small_group_id, memberIds);
+  }
+
+  const groupsByEventId = new Map<string, string[][]>();
+
+  for (const [groupId, memberIds] of memberIdsByGroupId) {
+    const eventId = eventIdByGroupId.get(groupId);
+    if (!eventId || memberIds.length < 2) continue;
+
+    const eventGroups = groupsByEventId.get(eventId) ?? [];
+    eventGroups.push(memberIds);
+    groupsByEventId.set(eventId, eventGroups);
+  }
+
+  const pairings: RecentPairing[] = [];
+  let penaltyIndex = 0;
+
+  for (const event of events) {
+    const eventGroups = groupsByEventId.get(event.id);
+    if (!eventGroups?.length) continue;
+
+    const penalty = RECENT_EVENT_PENALTIES[penaltyIndex];
+    if (penalty === undefined) break;
+
+    for (const memberIds of eventGroups) {
+      for (let first = 0; first < memberIds.length; first += 1) {
+        for (let second = first + 1; second < memberIds.length; second += 1) {
+          pairings.push({
+            personAId: memberIds[first],
+            personBId: memberIds[second],
+            penalty,
+          });
+        }
+      }
+    }
+
+    penaltyIndex += 1;
+  }
+
+  return pairings;
 }
 

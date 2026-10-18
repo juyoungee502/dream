@@ -10,6 +10,12 @@ export type SeparationRule = {
   personBId: string;
 };
 
+export type RecentPairing = {
+  personAId: string;
+  personBId: string;
+  penalty: number;
+};
+
 export type MatchingResult = {
   groups: {
     groupNumber: number;
@@ -40,6 +46,7 @@ export function getGroupSizes(total: number): number[] {
 export function createMatchingGroups(
   attendees: Attendee[],
   rules: SeparationRule[],
+  recentPairings: RecentPairing[] = [],
 ): MatchingResult {
   const warnings: string[] = [];
   const sizes = getGroupSizes(attendees.length);
@@ -55,6 +62,20 @@ export function createMatchingGroups(
       pairKey(rule.personBId, rule.personAId),
     ]),
   );
+  const recentPairPenalties = new Map<string, number>();
+
+  for (const pairing of recentPairings) {
+    const key = pairKey(pairing.personAId, pairing.personBId);
+    recentPairPenalties.set(
+      key,
+      (recentPairPenalties.get(key) ?? 0) + pairing.penalty,
+    );
+    recentPairPenalties.set(
+      pairKey(pairing.personBId, pairing.personAId),
+      (recentPairPenalties.get(pairKey(pairing.personBId, pairing.personAId)) ??
+        0) + pairing.penalty,
+    );
+  }
 
   const byMokjang = new Map<string, Attendee[]>();
   [...attendees]
@@ -68,7 +89,12 @@ export function createMatchingGroups(
   const queue = interleaveBuckets([...byMokjang.values()]);
 
   for (const attendee of queue) {
-    const best = findBestGroup(groups, attendee, rulePairs);
+    const best = findBestGroup(
+      groups,
+      attendee,
+      rulePairs,
+      recentPairPenalties,
+    );
     best.members.push(attendee);
 
     const hasBlockedPair = best.members.some(
@@ -113,6 +139,7 @@ function findBestGroup(
   groups: WorkingGroup[],
   attendee: Attendee,
   rulePairs: Set<string>,
+  recentPairPenalties: Map<string, number>,
 ) {
   const candidates = groups.filter(
     (group) => group.members.length < group.targetSize,
@@ -120,7 +147,15 @@ function findBestGroup(
   const usable = candidates.length > 0 ? candidates : groups;
 
   return usable
-    .map((group) => ({ group, score: scoreGroup(group, attendee, rulePairs) }))
+    .map((group) => ({
+      group,
+      score: scoreGroup(
+        group,
+        attendee,
+        rulePairs,
+        recentPairPenalties,
+      ),
+    }))
     .sort((a, b) => a.score - b.score || a.group.groupNumber - b.group.groupNumber)[0]
     .group;
 }
@@ -129,6 +164,7 @@ function scoreGroup(
   group: WorkingGroup,
   attendee: Attendee,
   rulePairs: Set<string>,
+  recentPairPenalties: Map<string, number>,
 ) {
   const sameMokjangCount = group.members.filter(
     (member) => member.mokjangId === attendee.mokjangId,
@@ -136,9 +172,21 @@ function scoreGroup(
   const ruleViolations = group.members.filter((member) =>
     rulePairs.has(pairKey(member.personId, attendee.personId)),
   ).length;
+  const recentPairPenalty = group.members.reduce(
+    (total, member) =>
+      total +
+      (recentPairPenalties.get(pairKey(member.personId, attendee.personId)) ??
+        0),
+    0,
+  );
   const fillRatio = group.members.length / Math.max(group.targetSize, 1);
 
-  return ruleViolations * 100 + sameMokjangCount * 10 + fillRatio;
+  return (
+    ruleViolations * 1000 +
+    sameMokjangCount * 10 +
+    recentPairPenalty +
+    fillRatio
+  );
 }
 
 function pairKey(a: string, b: string) {
