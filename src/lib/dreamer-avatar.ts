@@ -22,6 +22,7 @@ import avatar20 from "@/src/img/20_festive_creature.png";
 import avatar21 from "@/src/img/21_lightning_adventurer.png";
 import avatar22 from "@/src/img/22_light_warrior.png";
 import avatar23 from "@/src/img/23_waffle_cat.png";
+import avatar24 from "@/src/img/24_usagi.png";
 import {
   DREAMER_AVATAR_COUNT,
   DREAMERS_PER_SET,
@@ -53,6 +54,7 @@ const DREAMER_AVATARS: Record<number, StaticImageData> = {
   21: avatar21,
   22: avatar22,
   23: avatar23,
+  24: avatar24,
 };
 
 type DreamerMember = {
